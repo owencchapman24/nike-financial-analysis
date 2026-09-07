@@ -1,0 +1,23 @@
+metric,statement_type,period_type,expected_unit,priority,taxonomy,tag,status,sign_convention,notes
+revenue,income_statement,duration,USD,1,us-gaap,RevenueFromContractWithCustomerExcludingAssessedTax,to_verify,reported_positive,Preferred modern US-GAAP revenue concept; verify against Nike company facts and face statement
+revenue,income_statement,duration,USD,2,us-gaap,SalesRevenueNet,to_verify,reported_positive,Possible legacy fallback; do not use without filing-level verification
+cost_of_revenue,income_statement,duration,USD,1,us-gaap,CostOfRevenue,to_verify,reported_positive,Verify whether Nike presents cost of revenues under this concept
+cost_of_revenue,income_statement,duration,USD,2,us-gaap,CostOfGoodsAndServicesSold,to_verify,reported_positive,Possible fallback
+gross_profit,income_statement,duration,USD,1,us-gaap,GrossProfit,to_verify,reported_positive,May also be calculated from reconciled revenue and cost of revenue
+operating_income,income_statement,duration,USD,1,us-gaap,OperatingIncomeLoss,to_verify,reported_signed,Verify consolidated annual context
+net_income,income_statement,duration,USD,1,us-gaap,NetIncomeLoss,to_verify,reported_signed,Verify income attributable to Nike and not a component context
+diluted_eps,income_statement,duration,USD/shares,1,us-gaap,EarningsPerShareDiluted,to_verify,reported_signed,Verify split-adjusted comparative presentation
+diluted_weighted_average_shares,income_statement,duration,shares,1,us-gaap,WeightedAverageNumberOfDilutedSharesOutstanding,to_verify,reported_positive,Convert to millions of shares in processed data
+cash_and_cash_equivalents,balance_sheet,instant,USD,1,us-gaap,CashAndCashEquivalentsAtCarryingValue,to_verify,reported_positive,Short-term investments remain a separate component
+short_term_investments,balance_sheet,instant,USD,1,us-gaap,ShortTermInvestments,to_verify,reported_positive,Verify tag and classification for each fiscal year
+accounts_receivable,balance_sheet,instant,USD,1,us-gaap,AccountsReceivableNetCurrent,to_verify,reported_positive,Use net current receivables
+inventory,balance_sheet,instant,USD,1,us-gaap,InventoryNet,to_verify,reported_positive,Verify consolidated context
+current_assets,balance_sheet,instant,USD,1,us-gaap,AssetsCurrent,to_verify,reported_positive,Verify face statement
+current_liabilities,balance_sheet,instant,USD,1,us-gaap,LiabilitiesCurrent,to_verify,reported_positive,Verify face statement
+total_assets,balance_sheet,instant,USD,1,us-gaap,Assets,to_verify,reported_positive,Verify face statement
+current_debt,balance_sheet,instant,USD,1,us-gaap,LongTermDebtCurrent,to_verify,reported_positive,Debt components will be summed only after classification review
+long_term_debt,balance_sheet,instant,USD,1,us-gaap,LongTermDebtNoncurrent,to_verify,reported_positive,Review lease and other financing claims separately
+shareholders_equity,balance_sheet,instant,USD,1,us-gaap,StockholdersEquity,to_verify,reported_signed,Verify Nike shareholders' equity scope
+operating_cash_flow,cash_flow_statement,duration,USD,1,us-gaap,NetCashProvidedByUsedInOperatingActivities,to_verify,reported_signed,Verify annual duration context
+capital_expenditures,cash_flow_statement,duration,USD,1,us-gaap,PaymentsToAcquirePropertyPlantAndEquipment,to_verify,processed_positive,Display as positive investment amount when calculating free cash flow
+depreciation_and_amortization,cash_flow_statement,duration,USD,1,us-gaap,DepreciationDepletionAndAmortization,to_verify,reported_positive,Use only if scope is consistent and reconcilable
