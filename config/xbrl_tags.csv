@@ -1,23 +1,32 @@
-metric,statement_type,period_type,expected_unit,priority,taxonomy,tag,status,sign_convention,notes
-revenue,income_statement,duration,USD,1,us-gaap,RevenueFromContractWithCustomerExcludingAssessedTax,to_verify,reported_positive,Preferred modern US-GAAP revenue concept; verify against Nike company facts and face statement
-revenue,income_statement,duration,USD,2,us-gaap,SalesRevenueNet,to_verify,reported_positive,Possible legacy fallback; do not use without filing-level verification
-cost_of_revenue,income_statement,duration,USD,1,us-gaap,CostOfRevenue,to_verify,reported_positive,Verify whether Nike presents cost of revenues under this concept
-cost_of_revenue,income_statement,duration,USD,2,us-gaap,CostOfGoodsAndServicesSold,to_verify,reported_positive,Possible fallback
-gross_profit,income_statement,duration,USD,1,us-gaap,GrossProfit,to_verify,reported_positive,May also be calculated from reconciled revenue and cost of revenue
-operating_income,income_statement,duration,USD,1,us-gaap,OperatingIncomeLoss,to_verify,reported_signed,Verify consolidated annual context
-net_income,income_statement,duration,USD,1,us-gaap,NetIncomeLoss,to_verify,reported_signed,Verify income attributable to Nike and not a component context
-diluted_eps,income_statement,duration,USD/shares,1,us-gaap,EarningsPerShareDiluted,to_verify,reported_signed,Verify split-adjusted comparative presentation
-diluted_weighted_average_shares,income_statement,duration,shares,1,us-gaap,WeightedAverageNumberOfDilutedSharesOutstanding,to_verify,reported_positive,Convert to millions of shares in processed data
-cash_and_cash_equivalents,balance_sheet,instant,USD,1,us-gaap,CashAndCashEquivalentsAtCarryingValue,to_verify,reported_positive,Short-term investments remain a separate component
-short_term_investments,balance_sheet,instant,USD,1,us-gaap,ShortTermInvestments,to_verify,reported_positive,Verify tag and classification for each fiscal year
-accounts_receivable,balance_sheet,instant,USD,1,us-gaap,AccountsReceivableNetCurrent,to_verify,reported_positive,Use net current receivables
-inventory,balance_sheet,instant,USD,1,us-gaap,InventoryNet,to_verify,reported_positive,Verify consolidated context
-current_assets,balance_sheet,instant,USD,1,us-gaap,AssetsCurrent,to_verify,reported_positive,Verify face statement
-current_liabilities,balance_sheet,instant,USD,1,us-gaap,LiabilitiesCurrent,to_verify,reported_positive,Verify face statement
-total_assets,balance_sheet,instant,USD,1,us-gaap,Assets,to_verify,reported_positive,Verify face statement
-current_debt,balance_sheet,instant,USD,1,us-gaap,LongTermDebtCurrent,to_verify,reported_positive,Debt components will be summed only after classification review
-long_term_debt,balance_sheet,instant,USD,1,us-gaap,LongTermDebtNoncurrent,to_verify,reported_positive,Review lease and other financing claims separately
-shareholders_equity,balance_sheet,instant,USD,1,us-gaap,StockholdersEquity,to_verify,reported_signed,Verify Nike shareholders' equity scope
-operating_cash_flow,cash_flow_statement,duration,USD,1,us-gaap,NetCashProvidedByUsedInOperatingActivities,to_verify,reported_signed,Verify annual duration context
-capital_expenditures,cash_flow_statement,duration,USD,1,us-gaap,PaymentsToAcquirePropertyPlantAndEquipment,to_verify,processed_positive,Display as positive investment amount when calculating free cash flow
-depreciation_and_amortization,cash_flow_statement,duration,USD,1,us-gaap,DepreciationDepletionAndAmortization,to_verify,reported_positive,Use only if scope is consistent and reconcilable
+metric,statement_type,period_type,expected_unit,priority,taxonomy,tag,verification_status,sign_convention,face_statement_labels,notes
+revenue,income_statement,duration,USD,1,us-gaap,RevenueFromContractWithCustomerExcludingAssessedTax,verified,reported_positive,Revenues,Present for all five periods and reconciles to the consolidated statements of income
+revenue,income_statement,duration,USD,2,us-gaap,SalesRevenueNet,rejected_no_annual_facts,reported_positive,Revenues,Legacy candidate has no matching annual Nike facts for the requested periods
+cost_of_revenue,income_statement,duration,USD,1,us-gaap,CostOfRevenue,rejected_no_annual_facts,reported_positive,Cost of sales,Concept exists but has no matching annual Nike facts for the requested periods
+cost_of_revenue,income_statement,duration,USD,2,us-gaap,CostOfGoodsAndServicesSold,verified,reported_positive,Cost of sales,Nike reports the face-statement line as Cost of sales
+gross_profit,income_statement,duration,USD,1,us-gaap,GrossProfit,verified,reported_positive,Gross profit,Reported directly and cross-checked to revenue less cost of sales
+total_selling_and_administrative_expense,income_statement,duration,USD,1,us-gaap,SellingGeneralAndAdministrativeExpense,verified,reported_positive,Total selling and administrative expense,Reported face-statement expense used to calculate derived operating income
+income_before_income_taxes,income_statement,duration,USD,1,us-gaap,IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,verified,reported_signed,Income before income taxes,Used in the independent derived-operating-income cross-check
+interest_income_expense_nonoperating_net,income_statement,duration,USD,1,us-gaap,InterestIncomeExpenseNonoperatingNet,verified,reported_signed_face_opposite,"Interest (income) expense, net;Interest expense (income), net",Nike changed the face-line wording while retaining the concept; positive normalized values represent income and negative values represent expense, and the face-statement expense label displays the opposite sign
+other_nonoperating_income_expense,income_statement,duration,USD,1,us-gaap,OtherNonoperatingIncomeExpense,verified,reported_signed_face_opposite,"Other (income) expense, net",Positive normalized values represent income and negative values represent expense; the face-statement expense label displays the opposite sign
+net_income,income_statement,duration,USD,1,us-gaap,NetIncomeLoss,verified,reported_signed,NET INCOME,Parent-level net income agrees across repeated comparative facts
+diluted_eps,income_statement,duration,USD/shares,1,us-gaap,EarningsPerShareDiluted,verified,reported_signed,Diluted (in dollars per share),Annual diluted EPS agrees across repeated comparative presentations
+diluted_weighted_average_shares,income_statement,duration,shares,1,us-gaap,WeightedAverageNumberOfDilutedSharesOutstanding,verified,reported_positive,Diluted (in shares),Converted from shares to millions of shares in the processed dataset
+cash_and_cash_equivalents,balance_sheet,instant,USD,1,us-gaap,CashAndCashEquivalentsAtCarryingValue,verified,reported_positive,Cash and equivalents,Instant balance reconciles to the consolidated balance sheet
+short_term_investments,balance_sheet,instant,USD,1,us-gaap,DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent,verified,reported_positive,Short-term investments,Nike uses the current available-for-sale debt securities concept for this face-statement line
+short_term_investments,balance_sheet,instant,USD,2,us-gaap,ShortTermInvestments,rejected_no_annual_facts,reported_positive,Short-term investments,Generic concept has no matching annual Nike facts for the requested periods
+accounts_receivable,balance_sheet,instant,USD,1,us-gaap,AccountsReceivableNetCurrent,verified,reported_positive,"Accounts receivable, net",Net current receivables reconcile to the consolidated balance sheet
+inventory,balance_sheet,instant,USD,1,us-gaap,InventoryFinishedGoodsNetOfReserves,verified,reported_positive,Inventories,Nike inventory is substantially finished goods and this concept reconciles to the face statement
+inventory,balance_sheet,instant,USD,2,us-gaap,InventoryNet,rejected_no_annual_facts,reported_positive,Inventories,Generic inventory concept has no matching annual Nike facts for the requested periods
+current_assets,balance_sheet,instant,USD,1,us-gaap,AssetsCurrent,verified,reported_positive,Total current assets,Instant balance reconciles to the consolidated balance sheet
+current_liabilities,balance_sheet,instant,USD,1,us-gaap,LiabilitiesCurrent,verified,reported_positive,Total current liabilities,Instant balance reconciles to the consolidated balance sheet
+total_assets,balance_sheet,instant,USD,1,us-gaap,Assets,verified,reported_positive,TOTAL ASSETS,Instant balance reconciles to the consolidated balance sheet
+notes_payable_and_short_term_borrowings,balance_sheet,instant,USD,1,us-gaap,ShortTermBorrowings,verified,reported_positive,Notes payable,FY2022 through FY2025 reconcile to the balance sheet and debt note; FY2026 uses a separately documented zero because Company Facts omits the consolidated instant fact
+current_portion_long_term_debt,balance_sheet,instant,USD,1,us-gaap,LongTermDebtCurrent,verified,reported_positive,Current portion of long-term debt,Current maturities only; not a label for all current interest-bearing borrowings
+noncurrent_long_term_debt,balance_sheet,instant,USD,1,us-gaap,LongTermDebtNoncurrent,verified,reported_positive,Long-term debt,Excludes current maturities and operating lease liabilities
+current_operating_lease_liabilities,balance_sheet,instant,USD,1,us-gaap,OperatingLeaseLiabilityCurrent,verified,reported_positive,Current portion of operating lease liabilities,Informational lease metric excluded from base total interest-bearing debt
+noncurrent_operating_lease_liabilities,balance_sheet,instant,USD,1,us-gaap,OperatingLeaseLiabilityNoncurrent,verified,reported_positive,Operating lease liabilities,Informational lease metric excluded from base total interest-bearing debt
+shareholders_equity,balance_sheet,instant,USD,1,us-gaap,StockholdersEquity,verified,reported_signed,Total shareholders' equity,Parent-level equity; selection falls back to the latest candidate visible on the balance sheet
+operating_cash_flow,cash_flow_statement,duration,USD,1,us-gaap,NetCashProvidedByUsedInOperatingActivities,verified,reported_signed,Cash provided (used) by operations,Annual duration reconciles to the consolidated statements of cash flows
+capital_expenditures,cash_flow_statement,duration,USD,1,us-gaap,PaymentsToAcquirePropertyPlantAndEquipment,verified,processed_positive,"Additions to property, plant and equipment",Company Facts reports a positive payment amount while the face statement displays the investing outflow in parentheses
+depreciation_and_amortization,cash_flow_statement,duration,USD,1,us-gaap,DepreciationDepletionAndAmortization,verified,reported_positive,Depreciation and amortization;Depreciation,Used beginning with Nike's later presentation and agrees with the overlapping depreciation facts
+depreciation_and_amortization,cash_flow_statement,duration,USD,2,us-gaap,Depreciation,verified_fallback,reported_positive,Depreciation;Depreciation and amortization,Required for FY2022 and retained as a comparable fallback for FY2023 and FY2024

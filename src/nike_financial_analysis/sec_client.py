@@ -46,6 +46,17 @@ class SecJsonResponse:
     from_cache: bool
 
 
+@dataclass(frozen=True)
+class SecTextResponse:
+    """SEC text content together with retrieval metadata."""
+
+    text: str
+    source_url: str
+    retrieved_at: str
+    content_sha256: str
+    from_cache: bool
+
+
 class SecClient:
     """Fetch and cache JSON from approved SEC hosts with conservative throttling."""
 
@@ -151,6 +162,32 @@ class SecClient:
             from_cache=True,
         )
 
+    def _load_text_cache(self, cache_path: Path, url: str) -> SecTextResponse | None:
+        if not cache_path.exists():
+            return None
+        try:
+            payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SecRequestError(
+                f"Cached SEC response is unreadable: {cache_path}. "
+                "Remove that cache file and retry."
+            ) from exc
+        if (
+            payload.get("source_url") != url
+            or not isinstance(payload.get("text"), str)
+            or not payload.get("sha256")
+        ):
+            raise SecRequestError(
+                f"Cached SEC response does not match the requested URL: {cache_path}."
+            )
+        return SecTextResponse(
+            text=payload["text"],
+            source_url=url,
+            retrieved_at=str(payload["retrieved_at"]),
+            content_sha256=str(payload["sha256"]),
+            from_cache=True,
+        )
+
     def _wait_for_rate_limit(self) -> None:
         if self._last_request_at is None:
             return
@@ -225,6 +262,83 @@ class SecClient:
                 temporary_path.replace(cache_path)
                 return SecJsonResponse(
                     data=data,
+                    source_url=url,
+                    retrieved_at=retrieved_at,
+                    content_sha256=content_sha256,
+                    from_cache=False,
+                )
+
+            if response.status_code in retryable_statuses and attempt < self.max_retries:
+                time.sleep(self._retry_delay(response, attempt))
+                continue
+            raise SecRequestError(
+                f"SEC request failed with HTTP {response.status_code} for {url}."
+            )
+
+        raise SecRequestError(
+            f"SEC request failed after {self.max_retries + 1} attempts for {url}. "
+            "Check the network connection and try again later."
+        ) from last_error
+
+    def get_text(
+        self,
+        url: str,
+        *,
+        cache_key: str,
+        force_refresh: bool = False,
+    ) -> SecTextResponse:
+        """Return SEC text from cache or the network with bounded retries."""
+
+        self._validate_url(url)
+        cache_path = self._cache_path(cache_key)
+        if not force_refresh:
+            cached = self._load_text_cache(cache_path, url)
+            if cached is not None:
+                return cached
+
+        retryable_statuses = {429, 500, 502, 503, 504}
+        last_error: Exception | None = None
+        for attempt in range(self.max_retries + 1):
+            self._wait_for_rate_limit()
+            try:
+                response = self.session.get(
+                    url,
+                    timeout=self.timeout_seconds,
+                    headers={"Accept": "text/html, application/xml, text/xml"},
+                )
+                self._last_request_at = time.monotonic()
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt == self.max_retries:
+                    break
+                time.sleep(2.0**attempt)
+                continue
+
+            if response.status_code == 200:
+                response.encoding = response.encoding or "utf-8"
+                text = response.text
+                retrieved_at = datetime.now(UTC).isoformat()
+                content_sha256 = hashlib.sha256(response.content).hexdigest()
+                cache_payload = {
+                    "source_url": url,
+                    "retrieved_at": retrieved_at,
+                    "response_headers": {
+                        "content_type": response.headers.get("Content-Type"),
+                        "etag": response.headers.get("ETag"),
+                        "last_modified": response.headers.get("Last-Modified"),
+                    },
+                    "sha256": content_sha256,
+                    "text": text,
+                }
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                temporary_path = cache_path.with_suffix(".json.tmp")
+                temporary_path.write_text(
+                    json.dumps(cache_payload, indent=2, sort_keys=True),
+                    encoding="utf-8",
+                )
+                temporary_path.replace(cache_path)
+                return SecTextResponse(
+                    text=text,
                     source_url=url,
                     retrieved_at=retrieved_at,
                     content_sha256=content_sha256,

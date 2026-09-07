@@ -16,6 +16,8 @@ class FakeResponse:
         "ETag": '"test-etag"',
     }
     content = b'{"verified": true}'
+    text = '{"verified": true}'
+    encoding = "utf-8"
 
     def json(self):
         return {"verified": True}
@@ -26,8 +28,8 @@ class RecordingSession:
         self.headers = {}
         self.calls = []
 
-    def get(self, url, timeout):
-        self.calls.append((url, timeout))
+    def get(self, url, timeout, headers=None):
+        self.calls.append((url, timeout, headers))
         return FakeResponse()
 
 
@@ -35,7 +37,7 @@ class FailingSession:
     def __init__(self):
         self.headers = {}
 
-    def get(self, url, timeout):
+    def get(self, url, timeout, headers=None):
         raise AssertionError("Network should not be used for a valid cache hit")
 
 
@@ -93,4 +95,34 @@ def test_successful_response_is_cached_and_reused(tmp_path):
     assert second.data == {"verified": True}
     assert second.from_cache is True
     assert second.retrieved_at == first.retrieved_at
+    assert second.content_sha256 == first.content_sha256
+
+
+def test_text_response_is_cached_and_reused(tmp_path):
+    url = "https://www.sec.gov/Archives/example/FilingSummary.xml"
+    recording_session = RecordingSession()
+    client = SecClient(
+        "Nike analysis analyst@domain.test",
+        cache_dir=tmp_path,
+        minimum_interval_seconds=0,
+        session=recording_session,
+    )
+
+    first = client.get_text(url, cache_key="filing_summary")
+
+    assert first.text == '{"verified": true}'
+    assert first.from_cache is False
+    assert recording_session.calls[0][2] == {
+        "Accept": "text/html, application/xml, text/xml"
+    }
+
+    cached_client = SecClient(
+        "Nike analysis analyst@domain.test",
+        cache_dir=tmp_path,
+        session=FailingSession(),
+    )
+    second = cached_client.get_text(url, cache_key="filing_summary")
+
+    assert second.text == first.text
+    assert second.from_cache is True
     assert second.content_sha256 == first.content_sha256

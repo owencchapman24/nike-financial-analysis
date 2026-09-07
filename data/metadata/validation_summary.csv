@@ -1,0 +1,18 @@
+check_id,scope,status,details
+five_requested_periods,dataset,pass,Found 5 fiscal periods; expected 5.
+unique_chronological_period_ends,dataset,pass,Period ends are unique and oldest-first.
+requested_period_mapping,dataset,pass,"Fiscal periods map to May 31, 2022 through May 31, 2026."
+gross_profit_equation,income_statement,pass,Gross profit equals revenue less cost of revenue within USD 1 million.
+derived_operating_income_formula,income_statement,pass,Derived operating income equals gross profit less total selling and administrative expense for all five fiscal years.
+derived_operating_income_crosscheck,income_statement,pass,Derived operating income plus signed interest and other non-operating income or expense equals income before taxes for all five fiscal years.
+operating_margin_formula,income_statement,pass,Operating margin equals derived operating income divided by revenue for all five fiscal years.
+debt_component_equation,balance_sheet,pass,Total interest-bearing debt equals notes payable or short-term borrowings plus current and noncurrent long-term debt for all five fiscal years.
+operating_lease_component_equation,balance_sheet,pass,Total operating lease liabilities equal current plus noncurrent components for all five fiscal years and remain outside base debt.
+allowed_selection_statuses,dataset,pass,All result statuses use the documented vocabulary.
+manual_review_not_used_in_calculations,calculated_metrics,pass,No calculated metric uses a missing or manual-review input.
+missing_values_disclosed,dataset,pass,No requested metric is silently missing.
+annual_context_selection,source_manifest,pass,Every selected reported fact is exact-form 10-K with fiscal period FY.
+face_statement_reconciliation,source_manifest,pass,Every selected reported fact has direct face-statement or component evidence.
+documented_zero_evidence,source_manifest,pass,Every documented zero is supported by a cached official SEC filing disclosure.
+manual_review_metrics,source_manifest,pass,No metrics require manual review.
+generated_output_privacy_scan,generated_files,pass,"No user-agent values, email addresses, or machine-specific user paths found."

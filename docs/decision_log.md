@@ -73,10 +73,92 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
   period ends retained in the filing index. The label remains provisional until
   Phase 2 verifies filing and XBRL fiscal-year metadata.
 
-## Decisions intentionally deferred
+## Phase 2 decisions
 
-- Historical fact selections and recast treatment
-- Cash-conversion and working-capital presentation details
+## D009 — Prefer agreed later comparative presentations
+
+- **Status:** Accepted by project owner
+- **Decision:** Retain every eligible originally reported and later comparative
+  fact. Select the latest face-statement-visible presentation only when all
+  comparable candidates agree. Otherwise mark the metric-year `manual_review`.
+- **Result:** No selected core concept changed value across the repeated comparative
+  presentations reviewed for FY2022–FY2026.
+
+## D010 — Reconcile selected facts to SEC-rendered face statements
+
+- **Status:** Implemented
+- **Decision:** A reported fact does not enter the cleaned dataset unless it agrees
+  with the applicable consolidated face statement within displayed precision.
+  Calculated subtotals use documented component and bridge checks because Nike does
+  not present them directly.
+- **Reason:** Company Facts is an aggregation API; the filing remains the accounting
+  source of record.
+
+## D011 — Use Nike-specific verified tag substitutions
+
+- **Status:** Accepted by project owner
+- **Decision:** Use `CostOfGoodsAndServicesSold` for cost of sales,
+  `InventoryFinishedGoodsNetOfReserves` for inventories, and
+  `DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent` for short-term
+  investments. The generic candidates have no matching annual facts for these five
+  periods.
+- **Validation:** Each selected substitution reconciles to the face-statement line.
+
+## D012 — Bridge the D&A tag transition without estimating
+
+- **Status:** Accepted by project owner
+- **Decision:** Use `Depreciation` for FY2022 and
+  `DepreciationDepletionAndAmortization` for FY2023–FY2026. The overlapping FY2023
+  and FY2024 values agree, and all selected values reconcile to the cash-flow line
+  displayed as either “Depreciation” or “Depreciation and amortization.”
+
+## D013 — Derive consolidated operating income
+
+- **Status:** Accepted by project owner
+- **Decision:** Calculate `derived_operating_income` as gross profit less total
+  selling and administrative expense, and calculate operating margin from that
+  derived measure.
+- **Validation:** For every year, bridge derived operating income to income before
+  taxes using signed net interest and other non-operating income or expense.
+- **Boundary:** This is a consolidated calculation because Nike does not show the
+  subtotal on its consolidated income statement. It is not segment-level EBIT.
+
+## D014 — Define debt scope narrowly and visibly
+
+- **Status:** Accepted by project owner
+- **Decision:** Present notes payable or short-term borrowings, current maturities
+  of long-term debt, and noncurrent long-term debt separately. Define total
+  interest-bearing debt as the sum of all three. Do not rely on `LongTermDebt` alone
+  when separately reported notes payable exist.
+- **Evidence:** FY2022 Note 7 reports $10 million of non-U.S. notes payable. The
+  annual notes disclose $6 million, $6 million, $5 million, and $0 for
+  FY2023-FY2026; FY2026's zero is separately documented because Company Facts omits
+  the consolidated annual fact.
+
+## D015 — Confirm Nike fiscal-year labels
+
+- **Status:** Verified
+- **Decision:** Use FY2022–FY2026 for the periods ending May 31, 2022 through
+  May 31, 2026. Each originally reported annual fact has `fp=FY`, and its `fy`
+  metadata agrees with the verified filing year.
+- **Reason:** This replaces the provisional Phase 1 period-end labels with verified
+  Nike fiscal-year labels while retaining the actual dates.
+
+## D016 — Keep operating leases outside base debt
+
+- **Status:** Accepted by project owner
+- **Decision:** Report current, noncurrent, and total operating lease liabilities as
+  informational metrics, but exclude them from base total interest-bearing debt.
+- **Reason:** Historical operating metrics retain lease expense in cost of sales and
+  operating overhead. Treating lease liabilities as debt without corresponding
+  operating-profit and cash-flow adjustments would mix conventions.
+- **Valuation handoff:** Version one will keep lease expense operating and exclude
+  lease liabilities from the enterprise-to-equity bridge unless a complete lease
+  capitalization adjustment is later justified and approved.
+
+## Decisions still deferred after Phase 2
+
+- Inventory-days and broader working-capital definitions
 - Base, bull, and bear assumptions
 - Forecast tax, reinvestment, and terminal economics
 - Year-end versus mid-year DCF discounting
