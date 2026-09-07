@@ -9,8 +9,8 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
 - **Reason:** Nike offers a recognizable operating business, public SEC filings, and
   relevant questions involving revenue, margins, inventory, cash conversion, and
   valuation.
-- **Limitation:** The project is educational and will not issue an investment
-  recommendation.
+- **Limitation:** The work is an independent portfolio analysis and will not issue
+  an investment recommendation.
 
 ## D002 — Use primary SEC sources for historical accounting data
 
@@ -156,9 +156,53 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
   lease liabilities from the enterprise-to-equity bridge unless a complete lease
   capitalization adjustment is later justified and approved.
 
-## Decisions still deferred after Phase 2
+## Phase 3 decisions
 
-- Inventory-days and broader working-capital definitions
+## D017 — Use average-balance efficiency metrics with 365 days
+
+- **Status:** Accepted by project owner
+- **Decision:** Calculate inventory days as average inventory divided by cost of
+  revenue times 365. Calculate `receivables_days_proxy` as average accounts
+  receivable divided by total revenue times 365.
+- **Boundary:** Calculate both only for FY2023-FY2026. FY2022 is `not_applicable`
+  because FY2021 opening balances are not present and ending balances are not an
+  acceptable substitute.
+- **Interpretation:** The 365-day factor is a consistent analytical convention. The
+  receivables measure is not DSO because total revenue, rather than disclosed credit
+  sales, is the denominator.
+
+## D018 — Preserve Decimal calculations through the analysis layer
+
+- **Status:** Accepted by project owner
+- **Decision:** Load financial values as strings, calculate with Decimal-compatible
+  logic, retain full available precision in CSV output, and convert to floating point
+  only at the Matplotlib boundary. Round only for presentation.
+
+## D019 — Present cash conversion as a ratio
+
+- **Status:** Accepted by project owner
+- **Decision:** Retain `cash_conversion = operating_cash_flow / net_income` and use
+  unit `x` in the KPI table and analysis. Use a 1.0x chart reference and do not
+  reinterpret the Phase 2 decimal value as a percentage.
+
+## D020 — Use a signed net-debt convention
+
+- **Status:** Accepted by project owner
+- **Decision:** Calculate `net_debt_after_cash_and_short_term_investments` as total
+  interest-bearing debt less cash and short-term investments. A negative amount is
+  described as net cash. Operating lease liabilities remain excluded and visible
+  separately.
+
+## D021 — Limit the historical presentation to five charts
+
+- **Status:** Accepted for Phase 3
+- **Decision:** Publish revenue and growth, margin, cash generation, working capital
+  and liquidity, and capital structure figures. Keep diluted EPS and share count in
+  the notebook and tables because a sixth chart adds limited information.
+
+## Decisions still deferred after Phase 3
+
+- Broader operating net-working-capital definitions for forecasting
 - Base, bull, and bear assumptions
 - Forecast tax, reinvestment, and terminal economics
 - Year-end versus mid-year DCF discounting

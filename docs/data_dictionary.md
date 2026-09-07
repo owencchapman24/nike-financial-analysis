@@ -33,7 +33,7 @@ fact retained as provenance after another agreeing presentation was selected.
 | `period_end` | Actual May 31 fiscal period end. |
 | `monetary_unit` | `USD millions` for monetary fields. |
 | `shares_unit` | Millions of diluted weighted-average shares. |
-| `ratio_unit` | Decimal; multiply by 100 to display a percentage. |
+| `ratio_unit` | Decimal storage convention. Margins and growth are displayed as percentages; cash conversion retains ratio unit `x`. |
 
 Every metric field has an adjacent `<metric>_status` field using the vocabulary
 above.
@@ -80,7 +80,7 @@ above.
 | `operating_cash_flow_margin` | `operating_cash_flow / revenue` |
 | `free_cash_flow` | `operating_cash_flow - capital_expenditures` |
 | `free_cash_flow_margin` | `free_cash_flow / revenue` |
-| `cash_conversion` | `operating_cash_flow / net_income` |
+| `cash_conversion` | `operating_cash_flow / net_income`; ratio unit `x`, so `1.12` means `1.12x`, not `1.12%`. |
 | `total_interest_bearing_debt` | `notes_payable_and_short_term_borrowings + current_portion_long_term_debt + noncurrent_long_term_debt`. Operating lease liabilities are excluded. |
 | `total_operating_lease_liabilities` | `current_operating_lease_liabilities + noncurrent_operating_lease_liabilities`; informational and excluded from base debt. |
 | `revenue_growth` | `(current revenue / prior revenue) - 1`; FY2022 is not applicable. |
@@ -147,3 +147,64 @@ It currently corroborates notes payable or short-term borrowings for FY2022-FY20
 and documents the FY2026 zero. It is not a general mechanism for manually typing
 historical values: nonzero values must agree with selected Company Facts, while an
 absent fact can be filled only by an affirmatively supported `documented_zero`.
+
+## Phase 3 analytical outputs
+
+Phase 3 reads the committed processed dataset as strings and performs new financial
+calculations with Decimal-compatible logic. The long KPI table preserves the full
+available Decimal result. Rounding is limited to notebook tables, chart annotations,
+and narrative text.
+
+### New KPI definitions
+
+| Field | Formula, unit, and status behavior |
+|---|---|
+| `sga_as_percent_of_revenue` | `total_selling_and_administrative_expense / revenue`; decimal displayed as a percentage; FY2022-FY2026. |
+| `cash_and_short_term_investments` | `cash_and_cash_equivalents + short_term_investments`; USD millions; FY2022-FY2026. |
+| `current_ratio` | `current_assets / current_liabilities`; unit `x`; FY2022-FY2026. A zero denominator produces no value. |
+| `net_working_capital` | `current_assets - current_liabilities`; USD millions; FY2022-FY2026. This is a broad balance-sheet measure, not operating net working capital. |
+| `accounts_receivable_growth` | `(accounts_receivable_t / accounts_receivable_t_minus_1) - 1`; decimal displayed as a percentage; FY2023-FY2026. FY2022 is `not_applicable`. |
+| `receivables_days_proxy` | `average accounts_receivable / revenue * 365`; days; FY2023-FY2026. FY2022 is `not_applicable` because FY2021 opening receivables are unavailable. Uses total revenue rather than disclosed credit sales, so it is not DSO. |
+| `inventory_growth` | `(inventory_t / inventory_t_minus_1) - 1`; decimal displayed as a percentage; FY2023-FY2026. FY2022 is `not_applicable`. |
+| `inventory_days` | `average inventory / cost_of_revenue * 365`; days; FY2023-FY2026. FY2022 is `not_applicable` because FY2021 opening inventory is unavailable. |
+| `net_debt_after_cash_and_short_term_investments` | `total_interest_bearing_debt - cash_and_cash_equivalents - short_term_investments`; USD millions; FY2022-FY2026. Negative values mean net cash. Operating lease liabilities are excluded. |
+| `diluted_eps_growth` | `(diluted_eps_t / diluted_eps_t_minus_1) - 1`; decimal displayed as a percentage; FY2023-FY2026. FY2022 is `not_applicable`. |
+| `revenue_cumulative_change` | `revenue_FY2026 - revenue_FY2022`; USD millions; displayed only on the FY2026 endpoint row. |
+| `revenue_cumulative_change_percent` | `(revenue_FY2026 / revenue_FY2022) - 1`; decimal displayed as a percentage; displayed only on the FY2026 endpoint row. |
+| `peak_revenue` | Maximum of the five validated revenue observations; USD millions; displayed on the FY2026 endpoint row with the associated fiscal year in `notes`. |
+
+The 365-day factor is a consistent analytical convention rather than a claim about
+the exact number of days in each Nike fiscal reporting period. All new calculations
+require inputs with `selected`, `calculated`, or `documented_zero` status. Missing or
+`manual_review` inputs do not produce calculated values.
+
+## `outputs/tables/historical_summary.csv`
+
+This recruiter-readable table has one row per fiscal year and selected value/status
+pairs. Its metadata fields are:
+
+| Field | Definition |
+|---|---|
+| `company_name`, `ticker` | Company identity retained from Phase 2. |
+| `fiscal_year`, `period_end` | Nike fiscal-year label and actual May 31 period end. |
+| `monetary_unit` | `USD millions`. |
+| `cash_conversion_unit` | `x`. |
+| `day_count_convention` | `365`. |
+| `net_debt_sign_convention` | Negative value means net cash. |
+| `<metric>`, `<metric>_status` | Full-precision value and adjacent quality status for each selected summary KPI. |
+
+## `outputs/tables/historical_kpis.csv`
+
+This audit-friendly table contains one row for every defined KPI and fiscal year.
+
+| Field | Definition |
+|---|---|
+| `category` | Revenue, profitability, cash generation, working capital and liquidity, capital structure, or per share. |
+| `metric`, `display_name` | Stable code identifier and readable label. |
+| `fiscal_year`, `period_end` | Observation period. Period-wide metrics appear only on the FY2026 endpoint row. |
+| `value`, `unit`, `status` | Full-precision Decimal text, semantic unit, and quality status. |
+| `value_source` | `sec_reported`, `filing_supported_documented_zero`, `phase2_calculated`, `phase3_calculated`, or a disclosed blocked/not-applicable classification. |
+| `formula`, `input_metrics` | Calculation lineage or reported-value designation. |
+| `applicable_fiscal_years` | Intended availability period. |
+| `presentation_rounding` | Display-only rounding convention. |
+| `notes` | Relevant accounting, sign, opening-balance, or interpretation limitation. |

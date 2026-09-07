@@ -4,23 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nike-financial-analysis"
-version = "0.2.0"
+version = "0.3.0"
 description = "Reproducible Nike financial analysis using primary SEC filing data"
 readme = "README.md"
 requires-python = ">=3.13,<3.15"
 dependencies = [
+    "matplotlib>=3.10,<4",
+    "pandas>=2.3,<4",
     "python-dotenv>=1.1,<2",
     "requests>=2.32,<3",
 ]
 
 [dependency-groups]
 dev = [
+    "ipykernel>=7,<8",
+    "nbclient>=0.10,<1",
+    "nbformat>=5.10,<6",
     "pytest>=8.4,<10",
 ]
 
 [project.scripts]
 nike-sec-filings = "nike_financial_analysis.extract:main"
 nike-historical-data = "nike_financial_analysis.pipeline:main"
+nike-historical-analysis = "nike_financial_analysis.analysis:main"
+nike-execute-notebook = "nike_financial_analysis.notebook_runner:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

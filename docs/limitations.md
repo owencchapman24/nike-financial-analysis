@@ -39,9 +39,43 @@
 
 ## Work intentionally outside Phase 2
 
-- No charts or analytical conclusions
-- No notebook narrative
-- No inventory days, ROIC, or advanced working-capital metrics
+- No ROIC or advanced operating-working-capital metrics
 - No segment or geography analysis
 - No operating scenarios, forecast, DCF, market inputs, or Excel model
 - No unofficial historical accounting source
+
+## Phase 3 analytical limitations
+
+- The analysis contains five annual observations. It cannot show quarterly
+  seasonality, distinguish shorter operating changes within a year, or establish a
+  durable long-run trend by itself.
+- Historical relationships do not prove causation. The notebook and findings state
+  observed changes without attributing them to pricing, mix, demand, foreign
+  exchange, strategy, or another driver unless a specific official disclosure is
+  separately cited.
+- `net_working_capital` is current assets less current liabilities. It is a broad
+  liquidity measure, not an operating net-working-capital definition for forecasting
+  or free-cash-flow valuation.
+- Inventory days and `receivables_days_proxy` use average beginning and ending
+  balances and a consistent 365-day convention. The convention is not a claim about
+  the exact length of each fiscal reporting period.
+- FY2022 inventory and receivables days are `not_applicable` because FY2021 opening
+  balances are not present. The project does not estimate them from ending balances.
+- The receivables-days proxy divides average receivables by total revenue because
+  separately disclosed credit sales are unavailable. It must not be described as
+  DSO.
+- Signed net debt excludes operating lease liabilities. A negative value indicates
+  net cash under this convention, not negative debt. The later valuation phase must
+  preserve this treatment or perform a complete lease-capitalization adjustment.
+- Phase 2 ratios are reused at their committed precision. New Phase 3 calculations
+  retain Decimal precision from the available committed inputs, but no analysis can
+  recover precision that the source dataset does not contain.
+
+## Work intentionally outside Phase 3
+
+- No forecasts, scenarios, WACC, DCF, terminal value, or price target
+- No peer comparison, stock-price series, macroeconomic series, or third-party API
+- No segment or geographic analysis
+- No machine learning, predictive model, interactive dashboard, or Excel valuation
+  workbook
+- No investment recommendation

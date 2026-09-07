@@ -204,3 +204,95 @@ retrieval timestamps rather than run timestamps. Default reruns reuse the exact 
 cache files. The validation summary scans generated tracked outputs for a literal
 SEC user-agent variable name, email-address marker, and common user-directory paths.
 The real local `.env` and all raw cache content remain ignored.
+
+## Phase 3: historical financial analysis
+
+### Input boundary
+
+Phase 3 reads only the committed `data/processed/nike_financials.csv`. It does not
+call the SEC, read `.env`, or refresh the raw cache. Before calculation, the analysis
+command verifies the approved SHA-256 hashes of the processed dataset, source
+manifest, and validation summary. It also requires exactly FY2022-FY2026 in
+chronological order, the expected May 31 period ends, documented status values, and
+numeric values for every validated input.
+
+Existing Phase 2 metrics are reused exactly. Phase 3 does not recompute revenue
+growth, CAGR, margins, free cash flow, cash conversion, debt, leases, or derived
+operating income under new names.
+
+### Decimal calculation discipline
+
+CSV fields are loaded as strings and converted to `Decimal` only when a calculation
+requires them. Addition, subtraction, averaging, division, and growth calculations
+therefore retain Decimal precision. The audit-friendly KPI table stores the complete
+Decimal result available from those inputs. Rounding occurs only in notebook tables,
+chart labels, and written narrative. Conversion to floating point occurs only inside
+the Matplotlib chart boundary.
+
+A Phase 3 calculation is valid only when all required inputs have `selected`,
+`calculated`, or `documented_zero` status. A `manual_review` or missing input produces
+no calculated value. A zero denominator produces a missing result rather than a
+plausible zero.
+
+### Additional historical KPIs
+
+Phase 3 adds these calculations:
+
+- `sga_as_percent_of_revenue = total_selling_and_administrative_expense / revenue`
+- `cash_and_short_term_investments = cash_and_cash_equivalents + short_term_investments`
+- `current_ratio = current_assets / current_liabilities`
+- `net_working_capital = current_assets - current_liabilities`
+- `net_debt_after_cash_and_short_term_investments = total_interest_bearing_debt - cash_and_cash_equivalents - short_term_investments`
+- year-over-year growth in accounts receivable, inventory, and diluted EPS
+- the FY2022-FY2026 absolute and percentage revenue change
+- the maximum revenue observation and its fiscal year
+
+The signed net-debt measure excludes operating lease liabilities. A negative value
+means cash and short-term investments exceed interest-bearing debt and is described
+as net cash in recruiter-facing material.
+
+### Efficiency-day convention
+
+Inventory days is:
+
+`average inventory / cost of revenue * 365`
+
+The receivables-days proxy is:
+
+`average accounts receivable / revenue * 365`
+
+Both metrics use beginning and ending balances and are therefore calculated only for
+FY2023-FY2026. FY2022 is `not_applicable` because the committed dataset does not
+contain FY2021 opening receivables or inventory. Ending balances are not used as a
+substitute.
+
+The 365-day factor is a consistent analytical convention, not a claim about the
+exact number of days in each Nike fiscal reporting period. The receivables measure
+uses total revenue rather than separately disclosed credit sales and is therefore
+named `receivables_days_proxy`, not DSO.
+
+### Artifact and chart generation
+
+`nike-historical-analysis` validates the Phase 2 input contract, creates a five-row
+historical summary, creates a long-form KPI audit table, and saves five static PNG
+figures. The command writes no retrieval time, build time, user-agent value, or local
+machine path. Repeated runs in the locked environment are required to produce
+identical files.
+
+The figures use a centralized colorblind-readable Matplotlib style and a
+non-interactive backend. Unlike units are separated into panels instead of combined
+through unnecessary secondary axes. Source notes identify Nike 10-K filings, SEC
+Company Facts, and project calculations. The margin chart identifies derived
+operating margin; the cash chart uses a 1.0x cash-conversion reference; and the
+capital-structure chart displays lease liabilities separately from debt.
+
+### Notebook execution and narrative
+
+The historical notebook imports calculations and presentation helpers from `src/`.
+It is executed from the repository root through the `nbclient` runner, so a clean
+kernel can load repository-relative data and figures. Cell IDs and output metadata
+are deterministic, and execution timing metadata is removed. The notebook contains
+deliberately written Markdown rather than generated conclusions.
+
+The narrative distinguishes observed changes from causal interpretation. It does not
+forecast, value Nike, use stock-price data, or make an investment recommendation.
