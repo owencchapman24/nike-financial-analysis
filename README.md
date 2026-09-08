@@ -1,15 +1,15 @@
 # Nike Financial Analysis
 
-Reproducible Python analysis of Nike's FY2022-FY2026 financial performance using
-reconciled SEC filing data, auditable calculation lineage, and recruiter-facing
-historical analysis.
+Reproducible Python analysis of Nike's FY2022-FY2026 financial performance and
+FY2027-FY2031 operating scenarios using reconciled SEC data and auditable
+calculation lineage.
 
 > **Project status:** The SEC data foundation, reconciled FY2022-FY2026 historical
-> dataset, and recruiter-facing historical analysis are implemented. Forecasting,
-> scenarios, valuation, and the Excel model have not begun.
+> dataset, recruiter-facing historical analysis, and documented FY2027-FY2031
+> operating scenarios are implemented. Valuation and the Excel model have not begun.
 
-This independent portfolio analysis uses official SEC-derived data. It is historical
-analysis, not an investment recommendation.
+This independent portfolio analysis combines historical results with documented
+project analyst scenarios. It is not an investment recommendation.
 
 ## Project objective
 
@@ -23,8 +23,9 @@ The completed project will answer six business questions:
 6. What valuation range follows from those assumptions, and which assumptions matter
    most?
 
-The current historical-analysis phase addresses the first four questions without
-forecasting future results or making an investment recommendation.
+The historical analysis addresses the first four questions. Phase 4 adds project
+analyst operating scenarios for question five without valuation or an investment
+recommendation.
 
 ## Historical scope and data foundation
 
@@ -71,6 +72,38 @@ The complete narrative, all five figures, and supporting tables appear in the
 [historical-analysis notebook](notebooks/01_historical_analysis.ipynb). A shorter
 review copy is maintained in [historical findings](docs/historical_findings.md).
 
+## FY2027-FY2031 operating scenarios
+
+Phase 4 translates the reconciled history into base, bull, and bear consolidated
+operating forecasts. These are documented project analyst scenarios, not Nike
+guidance, consensus estimates, probabilities, or price targets. The information
+cutoff is September 7, 2026; Nike's subsequently scheduled FY2027 first-quarter
+results are excluded.
+
+- Base revenue declines 2.0% in FY2027, then recovers to USD 51,421 million in
+  FY2031. Derived operating margin moves from 7.3% to 12.0%, and FCFF reaches
+  USD 4,773 million.
+- Bull revenue reaches USD 55,337 million in FY2031, with a 14.0% derived operating
+  margin and USD 5,994 million of FCFF. Higher growth is paired with higher capex.
+- Bear revenue declines through FY2028 and finishes at USD 46,337 million in FY2031.
+  Derived operating margin reaches 8.2%, and FCFF reaches USD 2,988 million.
+
+FY2026 reported gross margin remains 42.9%. Nike disclosed that the year included
+an approximately 210-basis-point IEEPA tariff-recovery benefit and would have been
+approximately 40.8% excluding that benefit. The forecast does not replace the
+reported actual; FY2027 scenario margins imply different degrees of underlying
+operational recovery.
+
+![Nike actual and scenario revenue paths](outputs/charts/06_forecast_revenue.png)
+
+![Nike historical bridge and scenario FCFF](outputs/charts/08_forecast_fcff.png)
+
+See the [scenario-forecast notebook](notebooks/02_scenario_forecast.ipynb),
+[forecast methodology](docs/forecast_methodology.md),
+[scenario rationale](docs/scenario_rationale.md),
+[documented assumption register](config/scenario_assumptions.csv), and
+[forecast source register](config/forecast_sources.csv).
+
 ## Accounting and analytical conventions
 
 - Derived operating income equals gross profit less total selling and administrative
@@ -83,8 +116,10 @@ review copy is maintained in [historical findings](docs/historical_findings.md).
   and noncurrent long-term debt. FY2026 short-term borrowings are a filing-supported
   documented zero.
 - Operating lease liabilities remain separate from interest-bearing debt.
-- Capital expenditures are positive investment amounts. Free cash flow equals
-  operating cash flow less capital expenditures.
+- Capital expenditures are positive investment amounts. Phase 3 historical free
+  cash flow equals operating cash flow less capital expenditures. Phase 4 FCFF
+  equals NOPAT plus D&A less capital expenditures and the change in operating NWC.
+  These related measures are not interchangeable.
 - Cash conversion is a ratio in `x`, not a percentage.
 - Inventory days and `receivables_days_proxy` use average balances and a consistent
   365-day analytical convention. FY2022 is not applicable because FY2021 opening
@@ -136,6 +171,21 @@ The artifact command rebuilds:
 - [audit-friendly KPI table](outputs/tables/historical_kpis.csv)
 - [five static charts](outputs/charts/)
 
+## Reproduce the operating scenarios
+
+Phase 4 also requires no network access or `.env`. It protects the committed Phase
+2-3 artifacts before calculating the forecast:
+
+```powershell
+uv run nike-scenario-forecast
+uv run nike-execute-notebook notebooks/02_scenario_forecast.ipynb --in-place
+uv run pytest
+```
+
+The command rebuilds the long-form forecast, readable scenario summary, resolved
+assumption audit, validation summary, and four static forecast charts. It does not
+perform valuation.
+
 ## Repository guide
 
 - `src/nike_financial_analysis/` — SEC access, selection, calculations, charts, and
@@ -155,9 +205,9 @@ full audit trail.
 ## Limitations and future work
 
 Five annual observations cannot show quarterly seasonality or establish causation.
-Several project conventions, including derived operating income, the D&A tag
-transition, the receivables-days proxy, and operating-lease exclusion, require care
-when interpreting the figures. Future phases may add owner-approved operating
-scenarios, a five-year forecast, and a formula-driven DCF. Peer valuation, machine
-learning, stock-price prediction, and interactive dashboards remain outside version
-one.
+Several project conventions, including derived operating income, the aggregate
+operating-NWC proxy, the D&A tag transition, the receivables-days proxy, and
+operating-lease exclusion, require care when interpreting the figures. A future
+phase may use the operating forecast in a formula-driven DCF. Peer valuation,
+machine learning, stock-price prediction, and interactive dashboards remain outside
+version one.

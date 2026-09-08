@@ -1,0 +1,18 @@
+check_id,scope,scenario,fiscal_year,status,details
+assumption_grid,assumptions,all,FY2027-FY2031,pass,Exactly 105 unique scenario-year-driver assumptions are present.
+owner_approval,assumptions,all,FY2027-FY2031,pass,All required assumptions are owner-approved.
+assumption_units,assumptions,all,FY2027-FY2031,pass,All drivers use decimal rate semantics.
+assumption_sources,assumptions,all,FY2027-FY2031,pass,Every assumption has a source or rationale identifier.
+valuation_boundary,scope,all,FY2027-FY2031,pass,No valuation driver is present.
+economic_bounds,assumptions,all,FY2027-FY2031,pass,All rates are within documented operating bounds.
+scenario_direction,coherence,all,FY2027-FY2031,pass,Scenario drivers retain the approved directional ordering.
+source_register,sources,all,FY2027-FY2031,pass,Every assumption source_id resolves in the forecast source register.
+information_cutoff,sources,all,FY2027-FY2031,pass,"Every source was available on or before September 7, 2026."
+forecast_periods,forecast,all,FY2027-FY2031,pass,Exactly three scenarios and FY2027-FY2031 are present.
+positive_revenue,forecast,all,FY2027-FY2031,pass,Revenue remains positive in every forecast year.
+forecast_identities,forecast,all,FY2027-FY2031,pass,"Derived operating income, NOPAT, margin, and FCFF identities hold exactly."
+loss_tax_treatment,tax,all,FY2027-FY2031,pass,Negative derived operating income cannot generate a tax benefit.
+driver_identities,forecast,all,FY2027-FY2031,pass,"Gross profit, SG&A, D&A, capex, operating NWC, and FCFF margin match their approved drivers exactly."
+decimal_precision,forecast,all,FY2027-FY2031,pass,Every forecast numeric value remains Decimal-based.
+scenario_output_ordering,coherence,all,FY2027-FY2031,pass,"Bull, base, and bear outputs retain directional ordering."
+forecast_roll_forwards,forecast,all,FY2027-FY2031,pass,"Revenue and operating-NWC roll-forwards, including the FY2026 opening balance, hold exactly."

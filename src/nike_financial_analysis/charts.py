@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from io import BytesIO
 from pathlib import Path
 from typing import Callable
 
@@ -38,6 +39,22 @@ CHART_FILENAMES = (
     "03_cash_generation.png",
     "04_working_capital_and_liquidity.png",
     "05_capital_structure.png",
+)
+FORECAST_CHART_FILENAMES = (
+    "06_forecast_revenue.png",
+    "07_forecast_operating_margin.png",
+    "08_forecast_fcff.png",
+    "09_forecast_reinvestment_drivers.png",
+)
+FORECAST_YEARS = ("FY2027", "FY2028", "FY2029", "FY2030", "FY2031")
+SCENARIO_COLORS = {
+    "base": COLORS["blue"],
+    "bull": COLORS["green"],
+    "bear": COLORS["vermillion"],
+}
+FORECAST_SOURCE_NOTE = (
+    "Source: reconciled Nike SEC filings and documented project analyst scenarios; "
+    "information cutoff September 7, 2026. No valuation included."
 )
 
 
@@ -452,6 +469,21 @@ def save_chart(figure: Figure, path: Path) -> None:
     plt.close(figure)
 
 
+def figure_to_png_bytes(figure: Figure) -> bytes:
+    """Render a figure for notebook display without creating a temporary file."""
+
+    buffer = BytesIO()
+    figure.savefig(
+        buffer,
+        format="png",
+        dpi=150,
+        facecolor="white",
+        metadata={"Software": "nike-financial-analysis"},
+    )
+    plt.close(figure)
+    return buffer.getvalue()
+
+
 def generate_all_charts(
     kpi_rows: list[dict[str, str]], output_dir: Path
 ) -> tuple[Path, ...]:
@@ -468,5 +500,218 @@ def generate_all_charts(
     for filename, builder in zip(CHART_FILENAMES, builders, strict=True):
         path = output_dir / filename
         save_chart(builder(kpi_rows), path)
+        paths.append(path)
+    return tuple(paths)
+
+
+def _forecast_values(
+    rows: list[dict[str, str]], scenario: str, metric: str
+) -> list[Decimal | None]:
+    selected = [
+        row
+        for row in rows
+        if row["scenario"] == scenario and row["metric"] == metric
+    ]
+    order = FISCAL_YEARS if scenario == "actual" else FORECAST_YEARS
+    selected.sort(key=lambda row: order.index(row["fiscal_year"]))
+    if tuple(row["fiscal_year"] for row in selected) != order:
+        raise ValueError(f"Forecast chart metric {metric} is missing required {scenario} periods.")
+    return [Decimal(row["value"]) if row["value"] != "" else None for row in selected]
+
+
+def _finish_forecast_figure(fig: Figure, *, disclosure: str = "") -> Figure:
+    if disclosure:
+        fig.text(0.01, 0.04, disclosure, fontsize=8, color=COLORS["gray"])
+    fig.text(0.01, 0.015, FORECAST_SOURCE_NOTE, fontsize=8, color=COLORS["gray"])
+    return fig
+
+
+def _plot_actual_and_scenarios(
+    axis: Axes,
+    rows: list[dict[str, str]],
+    metric: str,
+    *,
+    scale: Decimal = Decimal("1"),
+    historical_label: str,
+) -> None:
+    all_years = (*FISCAL_YEARS, *FORECAST_YEARS)
+    actual_values = [
+        float(value * scale) if value is not None else float("nan")
+        for value in _forecast_values(rows, "actual", metric)
+    ]
+    axis.plot(
+        range(5),
+        actual_values,
+        color=COLORS["navy"],
+        linewidth=2.6,
+        marker="o",
+        label=historical_label,
+        zorder=5,
+    )
+    anchor = actual_values[-1]
+    for scenario in ("base", "bull", "bear"):
+        forecast = [
+            float(value * scale) if value is not None else float("nan")
+            for value in _forecast_values(rows, scenario, metric)
+        ]
+        axis.plot(
+            range(4, 10),
+            [anchor, *forecast],
+            color=SCENARIO_COLORS[scenario],
+            linewidth=2.2,
+            linestyle="--",
+            marker="o",
+            markevery=[1, 2, 3, 4, 5],
+            label=f"{scenario.title()} scenario",
+            zorder=2,
+        )
+    axis.axvline(4.5, color=COLORS["gray"], linestyle=":", linewidth=1.2)
+    axis.text(
+        4.55,
+        0.04,
+        "Forecast",
+        transform=axis.get_xaxis_transform(),
+        color=COLORS["gray"],
+        fontsize=8,
+        va="bottom",
+    )
+    axis.set_xticks(range(10), all_years, rotation=35, ha="right")
+    _grid(axis)
+
+
+def forecast_revenue_chart(rows: list[dict[str, str]]) -> Figure:
+    """Show historical revenue and three documented project scenario paths."""
+
+    _apply_style()
+    fig, axis = plt.subplots(figsize=(12, 7), dpi=150)
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.88, bottom=0.16)
+    axis.set_title("Actual and scenario revenue paths")
+    _plot_actual_and_scenarios(
+        axis, rows, "revenue", historical_label="Historical revenue"
+    )
+    axis.set_ylabel("USD millions")
+    axis.set_ylim(40000, 57000)
+    axis.set_yticks((40000, 45000, 50000, 55000))
+    axis.legend(frameon=False, ncols=2, loc="upper left")
+    return _finish_forecast_figure(
+        fig,
+        disclosure="Revenue axis uses a focused USD 40,000m-57,000m range.",
+    )
+
+
+def forecast_operating_margin_chart(rows: list[dict[str, str]]) -> Figure:
+    """Show the project-derived operating-margin history and scenarios."""
+
+    _apply_style()
+    fig, axis = plt.subplots(figsize=(12, 7), dpi=150)
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.80, bottom=0.18)
+    axis.set_title("Actual and scenario derived operating-margin paths")
+    _plot_actual_and_scenarios(
+        axis,
+        rows,
+        "operating_margin",
+        scale=Decimal("100"),
+        historical_label="Historical derived operating margin",
+    )
+    axis.set_ylabel("Derived operating margin (%)")
+    axis.set_ylim(bottom=0)
+    axis.legend(
+        frameon=False,
+        ncols=4,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.15),
+        fontsize=9,
+    )
+    return _finish_forecast_figure(
+        fig,
+        disclosure=(
+            "Project-derived operating income equals gross profit less total SG&A; "
+            "it is not Nike-reported consolidated EBIT or segment EBIT."
+        ),
+    )
+
+
+def forecast_fcff_chart(rows: list[dict[str, str]]) -> Figure:
+    """Show historical bridge FCFF and forecast scenario paths."""
+
+    _apply_style()
+    fig, axis = plt.subplots(figsize=(12, 7), dpi=150)
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.88, bottom=0.18)
+    axis.set_title("Historical bridge and scenario FCFF")
+    _plot_actual_and_scenarios(
+        axis, rows, "fcff", historical_label="Historical project FCFF"
+    )
+    axis.set_ylabel("USD millions")
+    axis.set_ylim(bottom=0)
+    axis.axhline(0, color=COLORS["ink"], linewidth=0.9)
+    axis.legend(frameon=False, ncols=2, loc="upper left")
+    return _finish_forecast_figure(
+        fig,
+        disclosure=(
+            "FCFF = NOPAT + D&A - capital expenditures - change in operating NWC; "
+            "FY2022 is unavailable because no FY2021 opening balance is present."
+        ),
+    )
+
+
+def forecast_reinvestment_chart(rows: list[dict[str, str]]) -> Figure:
+    """Compare D&A, capex, and operating-NWC forecast drivers."""
+
+    _apply_style()
+    fig, axes = plt.subplots(3, 1, figsize=(12, 8), dpi=150, sharex=True)
+    fig.subplots_adjust(left=0.09, right=0.97, top=0.82, bottom=0.14, hspace=0.30)
+    fig.suptitle(
+        "Actual and scenario reinvestment drivers",
+        fontsize=16,
+        fontweight="bold",
+        y=0.97,
+    )
+    specifications = (
+        ("da_percent_revenue", "D&A / revenue (%)", (1.2, 1.9)),
+        ("capex_percent_revenue", "Capital expenditures / revenue (%)", (0.8, 2.0)),
+        ("operating_nwc_percent_revenue", "Operating NWC / revenue (%)", (8.5, 12.5)),
+    )
+    for axis, (metric, label, limits) in zip(axes, specifications, strict=True):
+        _plot_actual_and_scenarios(
+            axis,
+            rows,
+            metric,
+            scale=Decimal("100"),
+            historical_label="Historical ratios",
+        )
+        axis.set_ylabel(label)
+        axis.set_ylim(*limits)
+    axes[0].legend(
+        frameon=False,
+        ncols=4,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.38),
+        fontsize=8,
+    )
+    axes[-1].set_xlabel("Nike fiscal year ended May 31")
+    return _finish_forecast_figure(
+        fig,
+        disclosure=(
+            "Operating NWC is an aggregate noncash, nondebt, nonlease proxy; "
+            "capital expenditures are positive investment amounts."
+        ),
+    )
+
+
+def generate_forecast_charts(
+    forecast_rows: list[dict[str, str]], output_dir: Path
+) -> tuple[Path, ...]:
+    """Generate the approved four-chart Phase 4 set."""
+
+    builders: tuple[Callable[[list[dict[str, str]]], Figure], ...] = (
+        forecast_revenue_chart,
+        forecast_operating_margin_chart,
+        forecast_fcff_chart,
+        forecast_reinvestment_chart,
+    )
+    paths: list[Path] = []
+    for filename, builder in zip(FORECAST_CHART_FILENAMES, builders, strict=True):
+        path = output_dir / filename
+        save_chart(builder(forecast_rows), path)
         paths.append(path)
     return tuple(paths)

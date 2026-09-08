@@ -208,3 +208,53 @@ This audit-friendly table contains one row for every defined KPI and fiscal year
 | `applicable_fiscal_years` | Intended availability period. |
 | `presentation_rounding` | Display-only rounding convention. |
 | `notes` | Relevant accounting, sign, opening-balance, or interpretation limitation. |
+
+## Phase 4 configuration and outputs
+
+### `config/scenario_assumptions.csv`
+
+One row represents one documented scenario-year-driver assumption. Its fields
+are `scenario`, `fiscal_year`, `driver`, full-precision decimal `value`, `unit`,
+`historical_anchor`, `rationale`, `source_id`, `source_type`, `owner_status`, and
+`notes`. Final generation requires exactly base, bull, and bear; exactly
+FY2027-FY2031; all seven required drivers; no duplicates; and
+`owner_status=approved`.
+
+### `config/forecast_sources.csv`
+
+The normalized source register stores `source_id`, title, publisher, source type,
+publication or filing date, information cutoff, URL or accession reference, the
+decision supported, and notes. It separates company evidence from analyst judgment.
+
+### Phase 4 metric definitions
+
+| Metric | Formula and unit |
+|---|---|
+| `revenue_growth` | Documented annual scenario driver; decimal. |
+| `revenue` | Prior-year revenue multiplied by one plus growth; USD millions. |
+| `gross_margin` | Documented annual scenario driver; decimal. FY2026 remains reported at 42.9%. |
+| `gross_profit` | Revenue multiplied by gross margin; USD millions. |
+| `sga_percent_revenue` | Documented annual scenario driver; decimal. |
+| `total_selling_and_administrative_expense` | Revenue multiplied by SG&A/revenue; USD millions. |
+| `derived_operating_income` | Gross profit less total SG&A; USD millions. Project-derived consolidated subtotal, not Nike-reported EBIT or segment EBIT. |
+| `operating_margin` | Derived operating income divided by revenue; decimal. |
+| `normalized_tax_rate` | Documented 21.0% operating tax assumption; decimal. |
+| `normalized_operating_tax_expense` | Positive derived operating income multiplied by tax rate; zero for an operating loss absent an NOL schedule. |
+| `nopat` | Derived operating income less normalized operating tax expense; USD millions. |
+| `da_percent_revenue` | Documented D&A/revenue driver; decimal. |
+| `depreciation_and_amortization` | Revenue multiplied by D&A/revenue; USD millions. |
+| `capex_percent_revenue` | Documented capital-expenditures/revenue driver; decimal. |
+| `capital_expenditures` | Revenue multiplied by capex/revenue; positive investment amount in USD millions. |
+| `operating_nwc_percent_revenue` | Documented aggregate operating-NWC driver; decimal. |
+| `operating_nwc_proxy` | Revenue multiplied by operating-NWC/revenue; USD millions. Historical formula excludes cash, short-term investments, short-term financing, current debt, and current lease liabilities. |
+| `change_in_operating_nwc` | Closing operating NWC less prior-year closing balance; USD millions. Positive is a use of cash. |
+| `fcff` | NOPAT plus D&A less capex less change in operating NWC; USD millions. |
+| `fcff_margin` | FCFF divided by revenue; decimal. |
+
+`outputs/tables/scenario_forecast_long.csv` preserves actual and forecast
+classification, status, value source, formula lineage, source IDs, units, and full
+Decimal text. `scenario_forecast_summary.csv` provides an FY2026 actual anchor and
+FY2027-FY2031 columns, rounded to whole USD millions and one decimal percentage
+point for recruiter-facing presentation; it is not the authoritative calculation
+source. Metric-specific notes explain forecast conventions. `scenario_assumptions_resolved.csv` joins each assumption to
+source metadata. `forecast_validation_summary.csv` provides human-readable checks.

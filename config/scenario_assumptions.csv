@@ -1,0 +1,106 @@
+scenario,fiscal_year,driver,value,unit,historical_anchor,rationale,source_id,source_type,owner_status,notes
+base,FY2027,revenue_growth,-0.020,decimal,FY2026 revenue USD 46398m and 0.2% growth,Near-term pressure followed by partial second-half improvement,FS04,analyst_assumption,approved,deterioration
+base,FY2027,gross_margin,0.425,decimal,FY2026 reported 42.9%,Modest decline from reported margin while underlying operations begin to recover,FS03,analyst_assumption,approved,deterioration
+base,FY2027,sga_percent_revenue,0.352,decimal,FY2026 34.7%,Cost rigidity and investment raise the ratio on lower revenue,FS04,analyst_assumption,approved,deterioration
+base,FY2027,normalized_tax_rate,0.210,decimal,FY2026 20.3% and FY2027 low-20% outlook,Transparent normalized operating tax rate,FS04,analyst_assumption,approved,constant across scenarios
+base,FY2027,da_percent_revenue,0.016,decimal,Five-year median 1.55%,Rounded stable historical anchor,FS01,analyst_assumption,approved,stabilization
+base,FY2027,capex_percent_revenue,0.015,decimal,Five-year average 1.50%,Maintains reinvestment during near-term pressure,FS01,analyst_assumption,approved,stabilization
+base,FY2027,operating_nwc_percent_revenue,0.111,decimal,FY2026 11.87% including tariff receivable,Partial normalization without separately adding subsequent collection,FS03,analyst_assumption,approved,normalization
+base,FY2028,revenue_growth,0.020,decimal,FY2022-FY2026 growth range -9.8% to 9.6%,Measured recovery after FY2027 pressure,FS04,analyst_assumption,approved,stabilization
+base,FY2028,gross_margin,0.432,decimal,Five-year median 43.52%,Gradual improvement without returning immediately to peak,FS03,analyst_assumption,approved,recovery
+base,FY2028,sga_percent_revenue,0.345,decimal,Three-year median 34.73%,Early operating leverage as revenue stabilizes,FS04,analyst_assumption,approved,recovery
+base,FY2028,normalized_tax_rate,0.210,decimal,FY2027 low-20% company outlook,No unsupported scenario tax mix,FS04,analyst_assumption,approved,constant across scenarios
+base,FY2028,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Stable asset-consumption proxy,FS01,analyst_assumption,approved,stabilization
+base,FY2028,capex_percent_revenue,0.016,decimal,Five-year median 1.58%,Reinvestment rises with recovery,FS01,analyst_assumption,approved,recovery
+base,FY2028,operating_nwc_percent_revenue,0.108,decimal,Five-year average 10.54%,Continued gradual normalization,FS01,analyst_assumption,approved,normalization
+base,FY2029,revenue_growth,0.035,decimal,FY2024 revenue peak USD 51362m,Recovery broadens but remains consolidated analyst judgment,FS04,analyst_assumption,approved,recovery
+base,FY2029,gross_margin,0.440,decimal,Five-year average 43.94%,Returns near historical average,FS03,analyst_assumption,approved,recovery
+base,FY2029,sga_percent_revenue,0.338,decimal,Five-year average 33.08%,Moderate operating leverage with absolute spending growth,FS04,analyst_assumption,approved,recovery
+base,FY2029,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,No discrete tax benefits forecast,FS03,analyst_assumption,approved,constant across scenarios
+base,FY2029,da_percent_revenue,0.016,decimal,Historical range 1.37%-1.67%,Stable within range,FS01,analyst_assumption,approved,recovery
+base,FY2029,capex_percent_revenue,0.017,decimal,Historical range 0.93%-1.89%,Supports renewed growth,FS01,analyst_assumption,approved,recovery
+base,FY2029,operating_nwc_percent_revenue,0.105,decimal,Five-year average 10.54%,Converges to average operating intensity,FS01,analyst_assumption,approved,recovery
+base,FY2030,revenue_growth,0.040,decimal,Historical maximum growth 9.65%,Recovery reaches its strongest annual rate,FS04,analyst_assumption,approved,recovery
+base,FY2030,gross_margin,0.445,decimal,FY2024 44.56%,Recovers to FY2024 vicinity,FS03,analyst_assumption,approved,recovery
+base,FY2030,sga_percent_revenue,0.332,decimal,Five-year average 33.08%,Operating leverage while absolute SG&A rises,FS04,analyst_assumption,approved,recovery
+base,FY2030,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,constant across scenarios
+base,FY2030,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Stable asset-consumption proxy,FS01,analyst_assumption,approved,recovery
+base,FY2030,capex_percent_revenue,0.017,decimal,Historical upper range 1.89%,Supports recovery without exceeding history,FS01,analyst_assumption,approved,recovery
+base,FY2030,operating_nwc_percent_revenue,0.102,decimal,Three-year average 9.99%,Approaches recent average,FS01,analyst_assumption,approved,recovery
+base,FY2031,revenue_growth,0.030,decimal,Five-year endpoint CAGR -0.2%,Fades toward mature nominal growth,FS01,analyst_assumption,approved,mature-state convergence
+base,FY2031,gross_margin,0.448,decimal,FY2024 44.56%,Sustainable recovery below historical peak,FS03,analyst_assumption,approved,mature-state convergence
+base,FY2031,sga_percent_revenue,0.328,decimal,Five-year average 33.08%,Modest mature operating leverage,FS04,analyst_assumption,approved,mature-state convergence
+base,FY2031,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,mature-state convergence
+base,FY2031,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Stable mature asset consumption,FS01,analyst_assumption,approved,mature-state convergence
+base,FY2031,capex_percent_revenue,0.017,decimal,Five-year median 1.58%,Capex remains modestly above D&A,FS01,analyst_assumption,approved,mature-state convergence
+base,FY2031,operating_nwc_percent_revenue,0.100,decimal,Three-year average 9.99%,Converges to recent average,FS01,analyst_assumption,approved,mature-state convergence
+bull,FY2027,revenue_growth,0.005,decimal,FY2026 revenue USD 46398m,Strong second half offsets near-term pressure,FS04,analyst_assumption,approved,stabilization
+bull,FY2027,gross_margin,0.430,decimal,FY2026 reported 42.9%,Earlier operational recovery absorbs tariff pressure,FS03,analyst_assumption,approved,stabilization
+bull,FY2027,sga_percent_revenue,0.348,decimal,FY2026 34.7%,Investment continues while revenue improves,FS04,analyst_assumption,approved,stabilization
+bull,FY2027,normalized_tax_rate,0.210,decimal,FY2027 low-20% company outlook,No scenario-specific tax benefit,FS04,analyst_assumption,approved,constant across scenarios
+bull,FY2027,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Stable opening reinvestment profile,FS01,analyst_assumption,approved,stabilization
+bull,FY2027,capex_percent_revenue,0.017,decimal,Historical range 0.93%-1.89%,Higher reinvestment supports upside,FS01,analyst_assumption,approved,stabilization
+bull,FY2027,operating_nwc_percent_revenue,0.108,decimal,FY2026 11.87% including tariff receivable,Stronger execution produces faster normalization,FS03,analyst_assumption,approved,normalization
+bull,FY2028,revenue_growth,0.040,decimal,Historical maximum 9.65%,Broader recovery develops sooner,FS04,analyst_assumption,approved,recovery
+bull,FY2028,gross_margin,0.440,decimal,Five-year average 43.94%,Recovery reaches historical average,FS03,analyst_assumption,approved,recovery
+bull,FY2028,sga_percent_revenue,0.340,decimal,Three-year average 33.91%,Operating leverage while absolute SG&A rises,FS04,analyst_assumption,approved,recovery
+bull,FY2028,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,No unsupported tax-mix upside,FS03,analyst_assumption,approved,constant across scenarios
+bull,FY2028,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Stable asset-consumption proxy,FS01,analyst_assumption,approved,recovery
+bull,FY2028,capex_percent_revenue,0.018,decimal,Historical maximum 1.89%,Higher reinvestment accompanies growth,FS01,analyst_assumption,approved,recovery
+bull,FY2028,operating_nwc_percent_revenue,0.104,decimal,Five-year average 10.54%,Efficiency improves within historical range,FS01,analyst_assumption,approved,recovery
+bull,FY2029,revenue_growth,0.050,decimal,FY2023 growth 9.65%,Strong recovery remains below historical maximum,FS04,analyst_assumption,approved,recovery
+bull,FY2029,gross_margin,0.450,decimal,FY2022 45.98%,Better mix pricing and cost execution,FS03,analyst_assumption,approved,recovery
+bull,FY2029,sga_percent_revenue,0.330,decimal,Five-year average 33.08%,Scale supports leverage without cutting absolute spend,FS04,analyst_assumption,approved,recovery
+bull,FY2029,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,constant across scenarios
+bull,FY2029,da_percent_revenue,0.016,decimal,Historical range 1.37%-1.67%,Stable during growth,FS01,analyst_assumption,approved,recovery
+bull,FY2029,capex_percent_revenue,0.019,decimal,Historical maximum 1.89%,Rounded high-end reinvestment supports growth,FS01,analyst_assumption,approved,recovery
+bull,FY2029,operating_nwc_percent_revenue,0.100,decimal,Three-year average 9.99%,Improved working-capital execution,FS01,analyst_assumption,approved,recovery
+bull,FY2030,revenue_growth,0.050,decimal,FY2023 growth 9.65%,Sustains strong recovery for a second year,FS04,analyst_assumption,approved,recovery
+bull,FY2030,gross_margin,0.455,decimal,FY2022 45.98%,Approaches historical peak without exceeding it,FS03,analyst_assumption,approved,recovery
+bull,FY2030,sga_percent_revenue,0.322,decimal,FY2024 32.27%,Returns to FY2024 efficiency with higher absolute spending,FS04,analyst_assumption,approved,recovery
+bull,FY2030,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,constant across scenarios
+bull,FY2030,da_percent_revenue,0.017,decimal,Historical maximum 1.67%,Prior reinvestment raises depreciation,FS01,analyst_assumption,approved,recovery
+bull,FY2030,capex_percent_revenue,0.019,decimal,Historical maximum 1.89%,Sustains growth investment,FS01,analyst_assumption,approved,recovery
+bull,FY2030,operating_nwc_percent_revenue,0.097,decimal,Historical minimum 8.97%,Improves toward historical low,FS01,analyst_assumption,approved,recovery
+bull,FY2031,revenue_growth,0.035,decimal,Historical five-year range,Fades toward mature nominal growth,FS01,analyst_assumption,approved,mature-state convergence
+bull,FY2031,gross_margin,0.458,decimal,FY2022 45.98%,Converges just below historical peak,FS03,analyst_assumption,approved,mature-state convergence
+bull,FY2031,sga_percent_revenue,0.318,decimal,FY2022 31.69%,Converges near historical low with higher absolute SG&A,FS04,analyst_assumption,approved,mature-state convergence
+bull,FY2031,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,mature-state convergence
+bull,FY2031,da_percent_revenue,0.017,decimal,Historical maximum 1.67%,Rounded mature asset consumption,FS01,analyst_assumption,approved,mature-state convergence
+bull,FY2031,capex_percent_revenue,0.018,decimal,Historical maximum 1.89%,Capex remains above D&A,FS01,analyst_assumption,approved,mature-state convergence
+bull,FY2031,operating_nwc_percent_revenue,0.095,decimal,Historical minimum 8.97%,Sustainable efficiency near historical low,FS01,analyst_assumption,approved,mature-state convergence
+bear,FY2027,revenue_growth,-0.040,decimal,FY2027 Q1 low-to-mid-single-digit decline outlook,Near-term weakness persists through the year,FS04,analyst_assumption,approved,deterioration
+bear,FY2027,gross_margin,0.415,decimal,FY2026 reported 42.9%,Tariff and promotional pressure outweigh efficiency,FS03,analyst_assumption,approved,deterioration
+bear,FY2027,sga_percent_revenue,0.355,decimal,FY2026 34.7%,Expense rigidity on lower revenue,FS04,analyst_assumption,approved,deterioration
+bear,FY2027,normalized_tax_rate,0.210,decimal,FY2027 low-20% company outlook,No automatic tax benefit,FS04,analyst_assumption,approved,constant across scenarios
+bear,FY2027,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Existing asset base continues to depreciate,FS01,analyst_assumption,approved,deterioration
+bear,FY2027,capex_percent_revenue,0.013,decimal,FY2025 low 0.93%,Reduced but maintenance-supporting reinvestment,FS01,analyst_assumption,approved,deterioration
+bear,FY2027,operating_nwc_percent_revenue,0.117,decimal,FY2026 11.87% including tariff receivable,Limited normalization and weaker efficiency,FS03,analyst_assumption,approved,deterioration
+bear,FY2028,revenue_growth,-0.010,decimal,FY2025 decline 9.84%,Weakness continues at a slower rate,FS04,analyst_assumption,approved,deterioration
+bear,FY2028,gross_margin,0.415,decimal,FY2026 reported 42.9%,No margin recovery yet,FS03,analyst_assumption,approved,deterioration
+bear,FY2028,sga_percent_revenue,0.357,decimal,FY2026 34.7%,Fixed-cost pressure reaches its peak,FS04,analyst_assumption,approved,deterioration
+bear,FY2028,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,No unsupported tax relief,FS03,analyst_assumption,approved,constant across scenarios
+bear,FY2028,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Existing asset base continues to depreciate,FS01,analyst_assumption,approved,deterioration
+bear,FY2028,capex_percent_revenue,0.013,decimal,FY2025 low 0.93%,Maintains operations despite lower growth,FS01,analyst_assumption,approved,deterioration
+bear,FY2028,operating_nwc_percent_revenue,0.118,decimal,FY2026 11.87%,Working-capital inefficiency persists,FS01,analyst_assumption,approved,deterioration
+bear,FY2029,revenue_growth,0.010,decimal,FY2026 growth 0.19%,Top line stabilizes near flat,FS04,analyst_assumption,approved,stabilization
+bear,FY2029,gross_margin,0.420,decimal,Historical minimum 42.73%,Partial recovery remains below historical range,FS03,analyst_assumption,approved,stabilization
+bear,FY2029,sga_percent_revenue,0.354,decimal,FY2026 34.7%,Only limited cost leverage,FS04,analyst_assumption,approved,stabilization
+bear,FY2029,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,constant across scenarios
+bear,FY2029,da_percent_revenue,0.016,decimal,Three-year average 1.61%,Stable asset consumption,FS01,analyst_assumption,approved,stabilization
+bear,FY2029,capex_percent_revenue,0.014,decimal,Five-year average 1.50%,Reinvestment begins to normalize,FS01,analyst_assumption,approved,stabilization
+bear,FY2029,operating_nwc_percent_revenue,0.118,decimal,FY2026 11.87%,Efficiency remains weak,FS01,analyst_assumption,approved,stabilization
+bear,FY2030,revenue_growth,0.020,decimal,Five-year average near flat,Modest delayed recovery,FS01,analyst_assumption,approved,recovery
+bear,FY2030,gross_margin,0.425,decimal,Historical minimum 42.73%,Returns toward historical low,FS03,analyst_assumption,approved,recovery
+bear,FY2030,sga_percent_revenue,0.350,decimal,FY2026 34.7%,Modest leverage during recovery,FS04,analyst_assumption,approved,recovery
+bear,FY2030,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,constant across scenarios
+bear,FY2030,da_percent_revenue,0.015,decimal,Five-year average 1.55%,Lower prior capex reduces D&A gradually,FS01,analyst_assumption,approved,recovery
+bear,FY2030,capex_percent_revenue,0.015,decimal,Five-year average 1.50%,Returns to maintenance-level investment,FS01,analyst_assumption,approved,recovery
+bear,FY2030,operating_nwc_percent_revenue,0.117,decimal,FY2026 11.87%,Slow efficiency improvement,FS01,analyst_assumption,approved,recovery
+bear,FY2031,revenue_growth,0.020,decimal,Five-year endpoint CAGR -0.2%,Converges to low mature nominal growth,FS01,analyst_assumption,approved,mature-state convergence
+bear,FY2031,gross_margin,0.428,decimal,FY2025 42.73%,Converges near historical low,FS03,analyst_assumption,approved,mature-state convergence
+bear,FY2031,sga_percent_revenue,0.346,decimal,FY2026 34.7%,Limited mature operating leverage,FS04,analyst_assumption,approved,mature-state convergence
+bear,FY2031,normalized_tax_rate,0.210,decimal,U.S. statutory rate 21.0%,Normalized tax held constant,FS03,analyst_assumption,approved,mature-state convergence
+bear,FY2031,da_percent_revenue,0.015,decimal,Five-year average 1.55%,Stable mature asset consumption,FS01,analyst_assumption,approved,mature-state convergence
+bear,FY2031,capex_percent_revenue,0.015,decimal,Five-year average 1.50%,Capex equals D&A at mature endpoint,FS01,analyst_assumption,approved,mature-state convergence
+bear,FY2031,operating_nwc_percent_revenue,0.115,decimal,Historical range 8.97%-11.87%,Remains near historical high,FS01,analyst_assumption,approved,mature-state convergence

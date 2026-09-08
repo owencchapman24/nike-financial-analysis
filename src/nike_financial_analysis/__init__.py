@@ -1,3 +1,3 @@
-"""Reproducible Nike historical financial analysis."""
+"""Reproducible Nike historical analysis and operating scenarios."""
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

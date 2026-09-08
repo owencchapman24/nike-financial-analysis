@@ -79,3 +79,41 @@
 - No machine learning, predictive model, interactive dashboard, or Excel valuation
   workbook
 - No investment recommendation
+
+## Phase 4 forecast limitations
+
+- Base, bull, and bear are project analyst scenarios, not Nike guidance, consensus
+  estimates, probabilities, or predictions. The five-year paths depend materially
+  on documented analyst assumptions.
+- The information cutoff is September 7, 2026. Nike's FY2027 first-quarter results,
+  scheduled after that date, are deliberately excluded.
+- The forecast is consolidated and driver-based, not a segment, geography, channel,
+  product, or full three-statement model. Qualitative disclosures inform assumptions
+  but do not support fabricated detailed forecasts.
+- FY2026 gross margin remains the reported 42.9% and includes an approximately
+  210-basis-point IEEPA tariff-recovery benefit. Nike's disclosed approximately
+  40.8% counterfactual excluding that benefit is context, not an adjusted actual.
+- The operating-NWC proxy uses aggregate current balances after excluding identifiable
+  cash, investments, financing, current debt, and current lease liabilities. Tax,
+  dividends payable, and other non-operating balances may remain embedded.
+- FY2027 working-capital normalization materially supports FCFF in every scenario.
+  Forecast FY2027 FCFF therefore should not be described as a purely operating-driven
+  improvement from FY2026.
+- The FY2026 tariff receivable is treated as embedded in opening operating NWC. No
+  separate future cash receipt is added to FCFF.
+- The 21.0% normalized tax rate is an operating assumption, not a cash-tax schedule.
+  No automatic loss-related tax benefit is recognized without an NOL schedule.
+- D&A and capex are simplified revenue-based drivers. The forecast does not include
+  a detailed fixed-asset roll-forward.
+- Lease expense remains operating, while operating lease liabilities are excluded
+  from debt, operating NWC, and separate FCFF adjustments. A later valuation must
+  keep this convention or perform a complete lease-capitalization adjustment.
+
+## Work intentionally outside Phase 4
+
+- No WACC, discount factors, terminal growth, terminal value, enterprise value,
+  equity bridge, market price, or implied share price
+- No forecast interest, debt repayment, dividends, repurchases, diluted shares, or EPS
+- No probability-weighted scenario, peer comparison, Monte Carlo simulation, or
+  investment recommendation
+- No Phase 5 Excel model

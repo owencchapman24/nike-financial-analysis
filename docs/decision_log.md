@@ -200,11 +200,66 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
   and liquidity, and capital structure figures. Keep diluted EPS and share count in
   the notebook and tables because a sixth chart adds limited information.
 
-## Decisions still deferred after Phase 3
+## Decisions deferred at Phase 3 completion
 
-- Broader operating net-working-capital definitions for forecasting
-- Base, bull, and bear assumptions
-- Forecast tax, reinvestment, and terminal economics
 - Year-end versus mid-year DCF discounting
 - WACC, terminal growth, and enterprise-to-equity bridge inputs
 - Optional segment or geography analysis
+
+## Phase 4 decisions
+
+## D022 — Use a consolidated driver-based operating forecast
+
+- **Status:** Accepted by project owner
+- **Decision:** Forecast FY2027-FY2031 revenue, gross margin, total SG&A, normalized
+  operating tax, D&A, capex, aggregate operating NWC, and FCFF for base, bull, and
+  bear scenarios. Do not create unsupported segment forecasts or a full
+  three-statement model.
+- **Boundary:** Phase 4 contains no valuation inputs or outputs.
+
+## D023 — Approve the 105 scenario assumptions
+
+- **Status:** Accepted by project owner
+- **Decision:** Use the exact annual paths in `config/scenario_assumptions.csv` for
+  seven drivers, five years, and three scenarios. Final generation requires every
+  row to remain owner-approved and source-resolved.
+
+## D024 — Use a 21.0% normalized operating tax rate
+
+- **Status:** Accepted by project owner
+- **Decision:** Hold the normalized operating tax rate constant across years and
+  scenarios. Do not generate an automatic tax benefit from negative derived
+  operating income without a separately documented NOL schedule.
+
+## D025 — Use the aggregate operating-NWC proxy
+
+- **Status:** Accepted by project owner
+- **Decision:** Exclude cash, short-term investments, notes payable or short-term
+  borrowings, current long-term debt, and current lease liabilities from aggregate
+  current assets and liabilities. Forecast the resulting proxy as a percentage of
+  revenue.
+- **Limitation:** Tax, dividend, and other aggregated current balances may remain.
+  The proxy is useful but is not perfectly defined operating working capital.
+
+## D026 — Preserve FY2026 reported gross margin and tariff context
+
+- **Status:** Accepted by project owner
+- **Decision:** Keep reported FY2026 gross margin at 42.9%; do not create an adjusted
+  actual. Disclose Nike's approximately 210-basis-point IEEPA recovery benefit and
+  approximately 40.8% counterfactual excluding it when interpreting FY2027 scenario
+  assumptions.
+
+## D027 — Avoid double counting tariff-receivable collection
+
+- **Status:** Accepted by project owner
+- **Decision:** Treat the FY2026 tariff receivable as already embedded in the USD
+  5,507 million opening operating-NWC balance. Do not add a separate subsequent
+  collection to FCFF.
+
+## Decisions still deferred after Phase 4
+
+- Year-end versus mid-year DCF discounting
+- WACC and terminal-growth assumptions
+- Terminal reinvestment and return-on-capital consistency
+- Enterprise-to-equity bridge inputs and valuation-date market evidence
+- Formula-driven Excel valuation-model design

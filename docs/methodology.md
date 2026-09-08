@@ -296,3 +296,43 @@ deliberately written Markdown rather than generated conclusions.
 
 The narrative distinguishes observed changes from causal interpretation. It does not
 forecast, value Nike, use stock-price data, or make an investment recommendation.
+
+## Phase 4: consolidated operating scenarios
+
+Phase 4 reads the protected FY2022-FY2026 history and the 105 documented inputs
+in `config/scenario_assumptions.csv`. It produces base, bull, and bear forecasts for
+FY2027-FY2031 without network access. The information cutoff is September 7, 2026.
+Actuals, company commentary, analyst assumptions, and calculated forecast outputs
+retain separate source classifications.
+
+The model forecasts revenue, gross profit, total SG&A, `derived_operating_income`,
+NOPAT, D&A, capital expenditures, an aggregate operating-NWC proxy, and FCFF. The
+canonical operating subtotal remains gross profit less total SG&A. Nike does not
+report this consolidated subtotal, and it is neither Nike-reported EBIT nor segment
+EBIT.
+
+FY2026 gross margin remains the reported 42.9%. Nike disclosed that the year included
+an approximately 210-basis-point IEEPA tariff-recovery benefit and would have been
+approximately 40.8% excluding the benefit. The model does not create an adjusted
+historical actual; the FY2027 scenario margins represent different degrees of
+underlying operational recovery.
+
+The normalized operating tax rate is 21.0% in every scenario. A negative derived
+operating result receives no automatic tax benefit unless a future phase adds a
+separately documented NOL schedule. D&A and capex are forecast separately as revenue
+percentages, and stock-based compensation is not added back.
+
+Operating NWC removes cash, short-term investments, short-term financing, current
+long-term debt, and current operating lease liabilities from aggregate current
+balances. The FY2026 opening proxy is USD 5,507 million. Its tariff receivable is
+already embedded, so the model does not separately add a subsequent tariff cash
+collection. Full formulas, limitations, and the FY2027 bridge appear in
+`docs/forecast_methodology.md`.
+
+FCFF is unlevered cash flow available to all capital providers:
+
+`NOPAT + D&A - capital expenditures - change in operating NWC`
+
+The model does not subtract interest, debt repayment, dividends, or repurchases. It
+contains no WACC, discounting, terminal value, enterprise value, equity value, or
+market-price input.

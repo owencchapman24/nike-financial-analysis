@@ -1,4 +1,4 @@
-"""Execute the historical-analysis notebook reproducibly with nbclient."""
+"""Execute a project notebook reproducibly with nbclient."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def execute_notebook(
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Execute the historical-analysis notebook from the repository root."
+        description="Execute a project notebook from the repository root."
     )
     parser.add_argument("notebook", type=Path)
     destination = parser.add_mutually_exclusive_group(required=True)
