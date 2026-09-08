@@ -117,3 +117,20 @@
 - No probability-weighted scenario, peer comparison, Monte Carlo simulation, or
   investment recommendation
 - No Phase 5 Excel model
+
+## Phase 5A valuation limitations
+
+- The DCF is conditional on three project analyst operating scenarios. It is not a
+  prediction, price target, or investment recommendation.
+- The May 31, 2026 model date and September 4, 2026 reference price are separate.
+  No stub-period update is inferred between those dates.
+- WACC depends on market observations and proxy choices, including product-level
+  sector betas, fair-value debt, an implied equity-risk premium, and a ratings-based
+  spread. The carrying-debt build is only a cross-check.
+- The terminal calculation assumes a common 2.5% perpetual-growth rate and stable
+  FY2031 operating ratios. Terminal value represents more than 75% of enterprise
+  value in each scenario, increasing sensitivity to WACC, terminal growth, and the
+  FY2031 operating state.
+- The diluted-share denominator is a proxy, not a forecast option schedule.
+- Operating leases remain outside net debt because lease expense remains operating.
+- No unsupported enterprise-to-equity bridge adjustments are included.

@@ -333,6 +333,20 @@ FCFF is unlevered cash flow available to all capital providers:
 
 `NOPAT + D&A - capital expenditures - change in operating NWC`
 
-The model does not subtract interest, debt repayment, dividends, or repurchases. It
-contains no WACC, discounting, terminal value, enterprise value, equity value, or
-market-price input.
+The model does not subtract interest, debt repayment, dividends, or repurchases.
+
+## Phase 5A valuation layer
+
+The valuation layer consumes the protected full-precision Phase 4 FCFF output
+without changing the operating forecast. It calculates a bottom-up WACC, discounts
+FY2027-FY2031 FCFF at exact May 31 dates using 365-day XNPV-equivalent exponents,
+constructs an explicit FY2032 stable-state bridge, and applies the Gordon-growth
+formula. The enterprise-to-equity bridge uses documented cash, investments,
+carrying debt, preferred stock, and a diluted-share proxy. Operating leases remain
+a memorandum item under the approved operating convention.
+
+The primary WACC uses fair-value debt for capital weighting; carrying debt is a
+cross-check. Bear, Base, and Bull use one 2.5% perpetual-growth rate and no
+probabilities. A direct-growth 5x5 Base-case sensitivity varies WACC and terminal
+growth around the full-precision center. Complete formulas and source lineage are
+documented in the valuation methodology.

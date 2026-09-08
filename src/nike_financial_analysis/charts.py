@@ -46,6 +46,7 @@ FORECAST_CHART_FILENAMES = (
     "08_forecast_fcff.png",
     "09_forecast_reinvestment_drivers.png",
 )
+VALUATION_CHART_FILENAMES = ("10_scenario_valuation.png",)
 FORECAST_YEARS = ("FY2027", "FY2028", "FY2029", "FY2030", "FY2031")
 SCENARIO_COLORS = {
     "base": COLORS["blue"],
@@ -55,6 +56,10 @@ SCENARIO_COLORS = {
 FORECAST_SOURCE_NOTE = (
     "Source: reconciled Nike SEC filings and documented project analyst scenarios; "
     "information cutoff September 7, 2026. No valuation included."
+)
+VALUATION_SOURCE_NOTE = (
+    "Source: reconciled Nike SEC filings, approved project analyst scenarios, and "
+    "documented valuation inputs; information cutoff September 7, 2026."
 )
 
 
@@ -715,3 +720,84 @@ def generate_forecast_charts(
         save_chart(builder(forecast_rows), path)
         paths.append(path)
     return tuple(paths)
+
+
+def scenario_valuation_chart(summary_rows: list[dict[str, str]]) -> Figure:
+    """Compare illustrative DCF value per share across operating scenarios."""
+
+    _apply_style()
+    order = ("bear", "base", "bull")
+    indexed = {row["scenario"]: row for row in summary_rows}
+    if set(indexed) != set(order):
+        raise ValueError("Valuation chart requires exactly Bear, Base, and Bull rows.")
+    values = [float(Decimal(indexed[scenario]["illustrative_value_per_share"])) for scenario in order]
+    reference_prices = {Decimal(row["reference_market_price"]) for row in summary_rows}
+    waccs = {Decimal(row["wacc"]) for row in summary_rows}
+    growth_rates = {Decimal(row["terminal_growth"]) for row in summary_rows}
+    if len(reference_prices) != 1 or len(waccs) != 1 or len(growth_rates) != 1:
+        raise ValueError("Valuation rows must use common market and headline assumptions.")
+    reference_price = float(reference_prices.pop())
+    displayed_wacc = waccs.pop()
+    terminal_growth = growth_rates.pop()
+
+    fig, axis = plt.subplots(figsize=(12, 7), dpi=150)
+    fig.subplots_adjust(left=0.10, right=0.97, top=0.82, bottom=0.18)
+    bars = axis.bar(
+        [scenario.title() for scenario in order],
+        values,
+        color=[SCENARIO_COLORS[scenario] for scenario in order],
+        width=0.58,
+    )
+    axis.set_title("Illustrative value per share by operating scenario")
+    fig.text(
+        0.5,
+        0.88,
+        (
+            "May 31, 2026 model date | "
+            f"{displayed_wacc:.1%} displayed WACC | "
+            f"{terminal_growth:.1%} perpetual growth"
+        ),
+        ha="center",
+        fontsize=10,
+        color=COLORS["gray"],
+    )
+    axis.set_ylabel("USD per diluted-proxy share")
+    axis.set_ylim(bottom=0, top=max(values + [reference_price]) * 1.22)
+    axis.axhline(
+        reference_price,
+        color=COLORS["ink"],
+        linewidth=1.2,
+        linestyle="--",
+        label=f"September 4, 2026 reference price: USD {reference_price:.2f}",
+    )
+    axis.legend(frameon=False, loc="upper left")
+    _grid(axis)
+    for bar, value in zip(bars, values, strict=True):
+        axis.text(
+            bar.get_x() + bar.get_width() / 2,
+            value + 1.0,
+            f"USD {value:.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            fontweight="bold",
+        )
+    fig.text(
+        0.01,
+        0.045,
+        "Illustrative project DCF comparison; not a price target or investment recommendation.",
+        fontsize=8,
+        color=COLORS["gray"],
+    )
+    fig.text(0.01, 0.02, VALUATION_SOURCE_NOTE, fontsize=8, color=COLORS["gray"])
+    return fig
+
+
+def generate_valuation_charts(
+    summary_rows: list[dict[str, str]], output_dir: Path
+) -> tuple[Path, ...]:
+    """Generate the bounded Phase 5A valuation chart set."""
+
+    path = output_dir / VALUATION_CHART_FILENAMES[0]
+    save_chart(scenario_valuation_chart(summary_rows), path)
+    return (path,)

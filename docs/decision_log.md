@@ -256,10 +256,17 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
   5,507 million opening operating-NWC balance. Do not add a separate subsequent
   collection to FCFF.
 
-## Decisions still deferred after Phase 4
+## D028 — Adopt the bounded Phase 5A DCF methodology
 
-- Year-end versus mid-year DCF discounting
-- WACC and terminal-growth assumptions
-- Terminal reinvestment and return-on-capital consistency
-- Enterprise-to-equity bridge inputs and valuation-date market evidence
-- Formula-driven Excel valuation-model design
+- **Status:** Accepted by project owner
+- **Decision:** Use a May 31, 2026 model date and exact May 31 fiscal-year-end cash-flow dates.
+- **WACC and terminal value:** Use a formula-derived bottom-up WACC with fair-value
+  debt, a common 2.5% perpetual-growth rate, and an explicit FY2032 stable-state bridge.
+- **Equity bridge:** Add USD 9,027 million of cash and investments; subtract USD 7,942
+  million of carrying debt and USD 0.3 million of preferred stock. Leases are memo only.
+- **Shares:** Use 1,484.698703 million diluted-proxy shares for headline value and
+  1,483.498703 million basic shares only as a denominator cross-check.
+
+## Decisions still deferred after Phase 5A
+
+- Formula-driven Excel valuation-model design and workbook presentation

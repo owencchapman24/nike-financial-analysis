@@ -1,12 +1,13 @@
 # Nike Financial Analysis
 
-Reproducible Python analysis of Nike's FY2022-FY2026 financial performance and
-FY2027-FY2031 operating scenarios using reconciled SEC data and auditable
-calculation lineage.
+Reproducible Python analysis of Nike's FY2022-FY2026 financial performance,
+FY2027-FY2031 operating scenarios, and a bounded DCF valuation using reconciled
+SEC data and auditable calculation lineage.
 
 > **Project status:** The SEC data foundation, reconciled FY2022-FY2026 historical
 > dataset, recruiter-facing historical analysis, and documented FY2027-FY2031
-> operating scenarios are implemented. Valuation and the Excel model have not begun.
+> operating scenarios and Python DCF valuation foundation are implemented. The
+> formula-driven Excel model has not begun.
 
 This independent portfolio analysis combines historical results with documented
 project analyst scenarios. It is not an investment recommendation.
@@ -23,9 +24,9 @@ The completed project will answer six business questions:
 6. What valuation range follows from those assumptions, and which assumptions matter
    most?
 
-The historical analysis addresses the first four questions. Phase 4 adds project
-analyst operating scenarios for question five without valuation or an investment
-recommendation.
+The historical analysis addresses the first four questions, Phase 4 addresses the
+fifth with project analyst operating scenarios, and Phase 5A adds a bounded DCF
+range and sensitivity analysis for the sixth. None is an investment recommendation.
 
 ## Historical scope and data foundation
 
@@ -103,6 +104,26 @@ See the [scenario-forecast notebook](notebooks/02_scenario_forecast.ipynb),
 [scenario rationale](docs/scenario_rationale.md),
 [documented assumption register](config/scenario_assumptions.csv), and
 [forecast source register](config/forecast_sources.csv).
+
+## Phase 5A DCF valuation foundation
+
+The bounded Python DCF values the three approved operating scenarios independently.
+It uses a May 31, 2026 model date, exact fiscal-year-end cash-flow dates, a
+formula-derived 8.4874% WACC (8.5% displayed), and a common 2.5% perpetual-growth
+rate. Scenario differences come from the approved operating forecasts.
+
+The illustrative values are USD 29.44 for Bear, USD 46.81 for Base, and USD 58.30
+for Bull per diluted-proxy share. They are compared with the separately dated
+September 4, 2026 reference price of USD 38.40; they are not price targets or
+investment recommendations. Terminal-value dependence is disclosed in the
+validation output.
+
+See the [DCF valuation methodology](docs/valuation_methodology.md),
+[valuation assumptions](config/valuation_assumptions.csv),
+[valuation sources](config/valuation_sources.csv), and
+[valuation summary](outputs/model_exports/valuation_summary.csv).
+
+[View the illustrative scenario valuation chart](outputs/charts/10_scenario_valuation.png).
 
 ## Accounting and analytical conventions
 
@@ -186,13 +207,25 @@ The command rebuilds the long-form forecast, readable scenario summary, resolved
 assumption audit, validation summary, and four static forecast charts. It does not
 perform valuation.
 
+## Reproduce the Phase 5A valuation
+
+Phase 5A requires no network access or `.env`:
+
+```powershell
+uv run nike-dcf-valuation
+uv run pytest
+```
+
+The command writes five CSV exports under `outputs/model_exports/` and one static
+chart under `outputs/charts/`.
+
 ## Repository guide
 
 - `src/nike_financial_analysis/` — SEC access, selection, calculations, charts, and
   notebook execution
 - `data/processed/` — committed reconciled historical data
 - `data/metadata/` — filing index, provenance, and validation results
-- `outputs/` — generated historical tables and figures
+- `outputs/` — generated historical, forecast, and valuation tables and figures
 - `notebooks/` — rendered analytical narrative
 - `docs/` — methodology, data dictionary, decisions, findings, and limitations
 - `tests/` — deterministic fixtures and pipeline, calculation, chart, artifact, and
@@ -207,7 +240,7 @@ full audit trail.
 Five annual observations cannot show quarterly seasonality or establish causation.
 Several project conventions, including derived operating income, the aggregate
 operating-NWC proxy, the D&A tag transition, the receivables-days proxy, and
-operating-lease exclusion, require care when interpreting the figures. A future
-phase may use the operating forecast in a formula-driven DCF. Peer valuation,
-machine learning, stock-price prediction, and interactive dashboards remain outside
-version one.
+operating-lease exclusion, require care when interpreting the figures. Phase 5A
+adds a bounded Python DCF; the formula-driven Excel model remains future work. Peer
+valuation, machine learning, stock-price prediction, and interactive dashboards
+remain outside version one.

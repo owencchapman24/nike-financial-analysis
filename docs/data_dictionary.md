@@ -258,3 +258,20 @@ FY2027-FY2031 columns, rounded to whole USD millions and one decimal percentage
 point for recruiter-facing presentation; it is not the authoritative calculation
 source. Metric-specific notes explain forecast conventions. `scenario_assumptions_resolved.csv` joins each assumption to
 source metadata. `forecast_validation_summary.csv` provides human-readable checks.
+
+## Phase 5A valuation files
+
+`config/valuation_assumptions.csv` stores one approved input per row with an input
+identifier, category, value, unit, observation date, source IDs, source type,
+status, and notes. `config/valuation_sources.csv` is the normalized source register.
+
+| Output | Purpose and key fields |
+|---|---|
+| `wacc_build.csv` | Primary fair-value-debt WACC and carrying-debt cross-check. Fields include case, metric, value, unit, status, input IDs, and notes. |
+| `valuation_cash_flows.csv` | FY2027-FY2031 FCFF, XNPV-equivalent discount exponents and factors, present values, and the explicit FY2032 terminal bridge. |
+| `valuation_summary.csv` | Scenario enterprise value, equity bridge, per-share values, dated reference-price comparison, terminal dependence, and implied terminal EV/EBITDA. |
+| `dcf_sensitivity.csv` | Twenty-five Base-case WACC/terminal-growth cells, including exact and displayed WACC values and center-cell status. |
+| `valuation_validation_summary.csv` | Human-readable input, formula, bridge, sensitivity, and terminal-dependence checks. |
+
+Authoritative calculation fields retain full Decimal text. Presentation documents
+round WACC, per-share values, ratios, and USD-millions amounts only for readability.

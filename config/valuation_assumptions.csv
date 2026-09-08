@@ -1,0 +1,35 @@
+assumption_id,category,input_name,value,unit,observation_date,source_ids,source_type,owner_status,notes
+VA01,model_timing,model_date,2026-05-31,date,2026-05-31,VS01;VS09,approved_methodology,approved,Primary financial-model date aligned with the FY2026 balance sheet.
+VA02,market,reference_market_date,2026-09-04,date,2026-09-04,VS04;VS05;VS09,reported_market_input,approved,Separately dated comparison; not the financial-model date.
+VA03,market,reference_market_price,38.40,USD per share,2026-09-04,VS05,reported_market_input,approved,NKE Class B closing price.
+VA04,shares,class_a_shares_outstanding,281.387752,millions,2026-07-08,VS02,reported_filing_input,approved,Economically participates with Class B and converts one-for-one.
+VA05,shares,class_b_shares_outstanding,1202.110951,millions,2026-07-08,VS02,reported_filing_input,approved,NKE publicly traded share class.
+VA06,shares,incremental_dilutive_share_proxy,1.2,millions,2026-05-31,VS02;VS09,reported_proxy,approved,FY2026 weighted-average incremental dilutive awards; not a point-in-time treasury-stock calculation.
+VA07,equity_bridge,cash_and_cash_equivalents,7563,USD millions,2026-05-31,VS01;VS02,reported_filing_input,approved,Added because FCFF values operating assets and excludes interest income.
+VA08,equity_bridge,short_term_investments,1464,USD millions,2026-05-31,VS01;VS02,reported_filing_input,approved,Added with cash; no unsupported minimum-cash deduction.
+VA09,debt,fair_value_debt,6800,USD millions,2026-05-31,VS02;VS09,reported_filing_input,approved,Approximate disclosed fair value used for primary WACC capital weighting.
+VA10,debt,carrying_interest_bearing_debt,7942,USD millions,2026-05-31,VS01;VS02;VS09,reported_filing_input,approved,Used in the primary enterprise-to-equity bridge and WACC cross-check.
+VA11,equity_bridge,redeemable_preferred_stock,0.3,USD millions,2026-05-31,VS02;VS09,reported_filing_input,approved,Explicit bridge deduction even though it rounds to zero in whole USD millions.
+VA12,memorandum,operating_lease_liabilities,3091,USD millions,2026-05-31,VS01;VS02;VS09,reported_filing_input,approved,Shown separately and not deducted under the approved operating lease convention.
+VA13,wacc,risk_free_rate,0.0478,decimal,2026-09-04,VS03,reported_market_input,approved,Ten-year nominal Treasury constant-maturity rate.
+VA14,wacc,equity_risk_premium,0.0414,decimal,2026-09-01,VS06,reported_market_input,approved,Implied US ERP using an unadjusted Treasury risk-free convention.
+VA15,wacc,debt_default_spread,0.0078,decimal,2026-01-01,VS02;VS08,market_proxy,approved,Conservative A2/A spread for Nike's A+ and A2 disclosed ratings.
+VA16,wacc,operating_tax_rate,0.210,decimal,2026-05-31,VS01;VS09,approved_methodology,approved,Approved Phase 4 normalized operating tax rate.
+VA17,bottom_up_beta,footwear_revenue,30538,USD millions,2026-05-31,VS02,reported_filing_input,approved,Nike Brand and Converse footwear revenue.
+VA18,bottom_up_beta,apparel_revenue,13497,USD millions,2026-05-31,VS02,reported_filing_input,approved,Nike Brand and Converse apparel revenue.
+VA19,bottom_up_beta,equipment_revenue,2220,USD millions,2026-05-31,VS02,reported_filing_input,approved,Nike Brand and Converse equipment revenue.
+VA20,bottom_up_beta,other_revenue,143,USD millions,2026-05-31,VS02,reported_filing_input,approved,Licensing; Converse other; and corporate residual reconciles product categories to revenue.
+VA21,bottom_up_beta,footwear_unlevered_beta,1.00,decimal,2026-01-01,VS07,market_proxy,approved,Damodaran cash-corrected Shoe sector unlevered beta.
+VA22,bottom_up_beta,apparel_unlevered_beta,0.79,decimal,2026-01-01,VS07,market_proxy,approved,Damodaran cash-corrected Apparel sector unlevered beta.
+VA23,bottom_up_beta,equipment_unlevered_beta,0.74,decimal,2026-01-01,VS07,market_proxy,approved,Damodaran cash-corrected Recreation sector unlevered beta.
+VA24,terminal_value,terminal_growth_rate,0.025,decimal,2026-09-07,VS09;VS10;VS11,approved_methodology,approved,Common perpetual growth rate for Bear; Base; and Bull headline valuations.
+VA25,sensitivity,sensitivity_wacc_delta_minus_100bp,-0.010,decimal,2026-09-07,VS09,approved_methodology,approved,Applied to the exact formula-derived WACC.
+VA26,sensitivity,sensitivity_wacc_delta_minus_50bp,-0.005,decimal,2026-09-07,VS09,approved_methodology,approved,Applied to the exact formula-derived WACC.
+VA27,sensitivity,sensitivity_wacc_delta_center,0.000,decimal,2026-09-07,VS09,approved_methodology,approved,Center row equals the exact formula-derived WACC.
+VA28,sensitivity,sensitivity_wacc_delta_plus_50bp,0.005,decimal,2026-09-07,VS09,approved_methodology,approved,Applied to the exact formula-derived WACC.
+VA29,sensitivity,sensitivity_wacc_delta_plus_100bp,0.010,decimal,2026-09-07,VS09,approved_methodology,approved,Applied to the exact formula-derived WACC.
+VA30,sensitivity,sensitivity_terminal_growth_150bp,0.015,decimal,2026-09-07,VS09,approved_methodology,approved,Direct-growth sensitivity column.
+VA31,sensitivity,sensitivity_terminal_growth_200bp,0.020,decimal,2026-09-07,VS09,approved_methodology,approved,Direct-growth sensitivity column.
+VA32,sensitivity,sensitivity_terminal_growth_250bp,0.025,decimal,2026-09-07,VS09,approved_methodology,approved,Center column equals the common headline terminal growth rate.
+VA33,sensitivity,sensitivity_terminal_growth_300bp,0.030,decimal,2026-09-07,VS09,approved_methodology,approved,Direct-growth sensitivity column.
+VA34,sensitivity,sensitivity_terminal_growth_350bp,0.035,decimal,2026-09-07,VS09,approved_methodology,approved,Direct-growth sensitivity column.

@@ -1,0 +1,39 @@
+case,line_order,metric,display_name,value,unit,status,input_ids,notes
+fair_value_debt_primary,1,market_price,Reference market price,38.40,USD per share,reported_input,VA03,NKE close on the separately dated market reference date.
+fair_value_debt_primary,2,basic_shares,Total basic shares,1483.498703,millions,calculated,VA04;VA05,Class A plus Class B shares.
+fair_value_debt_primary,3,market_equity,Market capitalization,56966.35019520,USD millions,calculated,VA03;VA04;VA05,Reference market price multiplied by basic shares.
+fair_value_debt_primary,4,classified_revenue,Beta-classified revenue,46255,USD millions,calculated,VA17;VA18;VA19,Footwear; apparel; and equipment revenue used for beta weighting.
+fair_value_debt_primary,5,other_revenue,Other revenue,143,USD millions,reported_input,VA20,Reconciles product categories to total revenue; assigned the blended core beta.
+fair_value_debt_primary,6,total_revenue,Total product revenue,46398,USD millions,calculated,VA17;VA18;VA19;VA20,Reconciles to FY2026 consolidated revenue.
+fair_value_debt_primary,7,unlevered_beta,Product-weighted unlevered beta,0.9262442979137390552372716463085071884121,x,calculated,VA17;VA18;VA19;VA21;VA22;VA23,Revenue-weighted cash-corrected sector betas.
+fair_value_debt_primary,8,debt,Debt used in WACC,6800,USD millions,reported_input,VA09;VA10,Fair value for primary WACC; carrying value for cross-check.
+fair_value_debt_primary,9,tax_rate,Operating tax rate,0.210,decimal,approved_assumption,VA16,Approved normalized operating tax rate.
+fair_value_debt_primary,10,levered_beta,Levered beta,1.013590325021718796141454165628647461484,x,calculated,VA09;VA10;VA16,Unlevered beta * [1 + (1-tax) * debt/market equity].
+fair_value_debt_primary,11,risk_free_rate,Risk-free rate,0.0478,decimal,reported_input,VA13,September 4 2026 ten-year Treasury rate.
+fair_value_debt_primary,12,equity_risk_premium,Equity risk premium,0.0414,decimal,reported_input,VA14,September 1 2026 implied US ERP.
+fair_value_debt_primary,13,cost_of_equity,Cost of equity,0.08976263945589915816025620245702600490544,decimal,calculated,VA13;VA14,Risk-free rate + levered beta * ERP.
+fair_value_debt_primary,14,default_spread,Default spread,0.0078,decimal,market_proxy,VA15,Conservative A2/A default spread.
+fair_value_debt_primary,15,pretax_cost_of_debt,Pretax cost of debt,0.0556,decimal,calculated,VA13;VA15,Risk-free rate + default spread.
+fair_value_debt_primary,16,after_tax_cost_of_debt,After-tax cost of debt,0.0439240,decimal,calculated,VA15;VA16,Pretax cost of debt * (1-tax).
+fair_value_debt_primary,17,equity_weight,Equity weight,0.8933606835080884287593870231896235722036,decimal,calculated,VA03;VA04;VA05;VA09;VA10,Market equity / (market equity + debt).
+fair_value_debt_primary,18,debt_weight,Debt weight,0.1066393164919115712406129768103764277964,decimal,calculated,VA03;VA04;VA05;VA09;VA10,Debt / (market equity + debt).
+fair_value_debt_primary,19,wacc,Calculated WACC,0.08487443827540290261078735104164066393683,decimal,calculated,VA13;VA14;VA15;VA16,Equity weight * cost of equity + debt weight * after-tax cost of debt.
+carrying_debt_cross_check,1,market_price,Reference market price,38.40,USD per share,reported_input,VA03,NKE close on the separately dated market reference date.
+carrying_debt_cross_check,2,basic_shares,Total basic shares,1483.498703,millions,calculated,VA04;VA05,Class A plus Class B shares.
+carrying_debt_cross_check,3,market_equity,Market capitalization,56966.35019520,USD millions,calculated,VA03;VA04;VA05,Reference market price multiplied by basic shares.
+carrying_debt_cross_check,4,classified_revenue,Beta-classified revenue,46255,USD millions,calculated,VA17;VA18;VA19,Footwear; apparel; and equipment revenue used for beta weighting.
+carrying_debt_cross_check,5,other_revenue,Other revenue,143,USD millions,reported_input,VA20,Reconciles product categories to total revenue; assigned the blended core beta.
+carrying_debt_cross_check,6,total_revenue,Total product revenue,46398,USD millions,calculated,VA17;VA18;VA19;VA20,Reconciles to FY2026 consolidated revenue.
+carrying_debt_cross_check,7,unlevered_beta,Product-weighted unlevered beta,0.9262442979137390552372716463085071884121,x,calculated,VA17;VA18;VA19;VA21;VA22;VA23,Revenue-weighted cash-corrected sector betas.
+carrying_debt_cross_check,8,debt,Debt used in WACC,7942,USD millions,reported_input,VA09;VA10,Fair value for primary WACC; carrying value for cross-check.
+carrying_debt_cross_check,9,tax_rate,Operating tax rate,0.210,decimal,approved_assumption,VA16,Approved normalized operating tax rate.
+carrying_debt_cross_check,10,levered_beta,Levered beta,1.028259319574264805569774229902706313225,x,calculated,VA09;VA10;VA16,Unlevered beta * [1 + (1-tax) * debt/market equity].
+carrying_debt_cross_check,11,risk_free_rate,Risk-free rate,0.0478,decimal,reported_input,VA13,September 4 2026 ten-year Treasury rate.
+carrying_debt_cross_check,12,equity_risk_premium,Equity risk premium,0.0414,decimal,reported_input,VA14,September 1 2026 implied US ERP.
+carrying_debt_cross_check,13,cost_of_equity,Cost of equity,0.09036993583037456295058865311797204136752,decimal,calculated,VA13;VA14,Risk-free rate + levered beta * ERP.
+carrying_debt_cross_check,14,default_spread,Default spread,0.0078,decimal,market_proxy,VA15,Conservative A2/A default spread.
+carrying_debt_cross_check,15,pretax_cost_of_debt,Pretax cost of debt,0.0556,decimal,calculated,VA13;VA15,Risk-free rate + default spread.
+carrying_debt_cross_check,16,after_tax_cost_of_debt,After-tax cost of debt,0.0439240,decimal,calculated,VA15;VA16,Pretax cost of debt * (1-tax).
+carrying_debt_cross_check,17,equity_weight,Equity weight,0.8776428614174310924760443109195681373583,decimal,calculated,VA03;VA04;VA05;VA09;VA10,Market equity / (market equity + debt).
+carrying_debt_cross_check,18,debt_weight,Debt weight,0.1223571385825689075239556890804318626417,decimal,calculated,VA03;VA04;VA05;VA09;VA10,Debt / (market equity + debt).
+carrying_debt_cross_check,19,wacc,Calculated WACC,0.08468694402338031986432473125546565497841,decimal,calculated,VA13;VA14;VA15;VA16,Equity weight * cost of equity + debt weight * after-tax cost of debt.
