@@ -2,12 +2,11 @@
 
 ## Purpose
 
-This independent portfolio project evaluates Nike's recent financial performance,
-develops three consolidated operating scenarios, and translates those scenarios
-into an illustrative DCF valuation. The central question is not whether Nike's
-shares should be bought or sold. It is how reported performance, explicit operating
-assumptions, reinvestment requirements, and valuation inputs connect in a
-reproducible analytical model.
+I built this independent portfolio project to connect Nike's reported performance
+with explicit operating assumptions, reinvestment requirements, and valuation
+inputs. It traces five historical years through three consolidated scenarios and an
+illustrative DCF; it does not recommend whether Nike's shares should be bought or
+sold.
 
 The historical period is FY2022-FY2026, the explicit forecast covers
 FY2027-FY2031, the DCF model date is May 31, 2026, and the information cutoff is
@@ -16,21 +15,17 @@ September 7, 2026. The separately dated comparison price is $38.40 on September 
 
 ## Architecture
 
-The repository separates source evidence, calculations, narrative, and presentation:
+The repository keeps source evidence, calculations, narrative, and presentation
+separate. Official SEC facts flow into a reconciled historical dataset and documented
+performance metrics. Approved Bear, Base, and Bull assumptions then drive the
+five-year operating forecast and FCFF calculation.
 
-1. Official SEC filing data is discovered, cached locally, and selected using
-   deterministic XBRL rules.
-2. Reconciled historical values are committed as auditable CSV and transformed into
-   documented performance metrics.
-3. Approved Base, Bull, and Bear assumptions drive a five-year consolidated
-   operating forecast and FCFF calculation.
-4. Python calculates WACC, the terminal bridge, scenario valuations, and sensitivity
-   outputs using Decimal arithmetic.
-5. Excel translates the authoritative Python model into visible native formulas and
-   independently checks the calculation chain.
+Python is the calculation source of record for WACC, the terminal bridge, scenario
+valuations, and sensitivity outputs. The Excel workbook presents the same model in
+visible native formulas and checks its results against Python.
 
 The main implementation lives in
-[`src/nike_financial_analysis/`](../src/nike_financial_analysis/). Reviewer-ready
+[`src/nike_financial_analysis/`](../src/nike_financial_analysis/). Published
 outputs are under [`outputs/`](../outputs/), and the formula-driven workbook is
 [`model/nike_valuation_model.xlsx`](../model/nike_valuation_model.xlsx).
 
@@ -64,11 +59,10 @@ The detailed rules are documented in the
 
 ## Historical analysis
 
-The historical analysis is organized around revenue, profitability, cash
-generation, working capital, liquidity, and capital structure rather than a large
-collection of disconnected ratios.
+The historical analysis covers revenue, profitability, cash generation, working
+capital, liquidity, and capital structure.
 
-The principal observations are:
+The five-year record shows:
 
 - Revenue reached $51,362 million in FY2024 and declined 9.7% to $46,398 million in
   FY2026. The FY2026 endpoint was 0.7% below FY2022.
@@ -164,9 +158,8 @@ important. Full calculations and limitations appear in the
 
 ## Python and Excel relationship
 
-The Python model is the authoritative calculation engine. It preserves Decimal
-precision, produces the valuation exports, and supplies the reconciliation
-benchmark.
+Python is the calculation source of record. It preserves Decimal precision, produces
+the valuation exports, and supplies the reconciliation benchmark.
 
 The Excel workbook is a transparent translation for reviewers. Its eight visible
 worksheets expose sources, historical inputs, all three scenarios, both WACC builds,
@@ -174,26 +167,20 @@ the selected-scenario DCF, sensitivity, and independent checks. The workbook use
 native formulas, an explicit present-value schedule, and an `XNPV` cross-check. It
 contains no macros, external workbook links, or live data connections.
 
-Workbook publication fails closed: a temporary candidate is recalculated in a
-dedicated Windows desktop Excel instance, reopened in formula and data-only modes,
-reconciled to Python, checked for package and formula errors, and published only
-after every blocking assertion passes. The
+The publication script recalculates a temporary candidate in a dedicated Windows
+desktop Excel instance, reopens it in formula and data-only modes, and checks it
+against Python before publishing. A failed package, formula, cache, or reconciliation
+check stops publication. The
 [`Excel model guide`](excel_model_guide.md) explains how to use and regenerate it.
 
 ## Validation controls
 
-The project includes controls at each layer:
-
-- deterministic fact-selection fixtures and failure cases;
-- unit, sign, fiscal-period, missing-input, and formula checks;
-- 17 passing historical data-quality checks;
-- status propagation that prevents unresolved inputs entering calculations;
-- protected hashes for upstream analytical artifacts;
-- deterministic table, chart, notebook, forecast, and valuation generation;
-- 105 automated tests in the locked environment;
-- 161 passing Excel blocking checks and zero failures;
-- exact explicit-PV versus `XNPV` reconciliation; and
-- Excel-to-Python reconciliation within documented tolerances.
+The controls focus on fact selection, units, signs, fiscal periods, missing inputs,
+and financial identities. Status propagation prevents unresolved inputs from
+entering calculations, while protected hashes detect changes to approved upstream
+artifacts. The test suite also checks repeatable artifact generation, notebook
+execution, and Excel-to-Python reconciliation, including the explicit-PV versus
+`XNPV` comparison.
 
 The three workbook warnings disclose terminal-value dependence above 75%; they are
 analytical warnings rather than calculation failures.
@@ -207,10 +194,10 @@ The information cutoff prevents later facts from entering the analysis. Terminal
 value represents most of enterprise value, and operating leases are excluded from
 net debt because lease expense remains operating.
 
-The full limitations are maintained in [`limitations.md`](limitations.md).
-Reasonable extensions include refreshed filings, consistent segment or geographic
+The full limitations are in [`limitations.md`](limitations.md). Possible extensions
+include refreshed filings, consistent segment or geographic
 analysis where disclosures permit, and a separately sourced comparable-company
-cross-check. They are not required to reproduce or validate the completed project.
+cross-check. They remain outside the current scope.
 
 This independent portfolio project is not affiliated with Nike and does not provide
 an investment recommendation, price target, or prediction of future stock

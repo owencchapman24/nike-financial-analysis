@@ -1,9 +1,10 @@
 # Nike Financial Analysis and DCF Valuation
 
-Independent portfolio project covering Nike's FY2022-FY2026 reported performance,
-FY2027-FY2031 operating scenarios, and an illustrative discounted-cash-flow
-valuation. Historical accounting data is reconciled to official SEC filings and
-carried through auditable Python calculations and a formula-driven Excel model.
+I built this independent portfolio project to examine how Nike's financial
+performance changed from FY2022 through FY2026 and what three operating-recovery
+paths could imply for valuation. The work starts with reconciled SEC filing data and
+carries the analysis through a five-year forecast, a Python DCF, and a formula-driven
+Excel model.
 
 | Scope item | Date or period |
 |---|---|
@@ -17,7 +18,8 @@ carried through auditable Python calculations and a formula-driven Excel model.
 $46.4 billion in FY2026. Derived operating margin declined from 14.3% in FY2022 to
 8.2% in FY2026, and FY2026 free cash flow was 67.0% below its FY2024 peak. The
 project's three approved operating scenarios produce illustrative values of $29.44
-to $58.30 per diluted-proxy share; the range is highly dependent on terminal value.
+(Bear), $46.81 (Base), and $58.30 (Bull) per diluted-proxy share; all are highly
+dependent on terminal value.
 
 **Start here:** [Download the Excel valuation model](model/nike_valuation_model.xlsx)
 · [Read the project walkthrough](docs/project_walkthrough.md)
@@ -30,19 +32,14 @@ or price target.
 
 ## Project overview
 
-The project answers six connected questions:
+The analysis connects three questions: how Nike's revenue, profitability, cash
+generation, working capital, and balance sheet changed; which assumptions support
+the Bear, Base, and Bull operating cases; and what valuation range follows from
+those assumptions.
 
-1. How did Nike's revenue, profitability, and cash generation change?
-2. Which reported operating and cost trends accompanied margin changes?
-3. What do inventory, receivables, liquidity, and cash conversion indicate?
-4. How effectively did accounting income translate into cash flow?
-5. What assumptions support coherent Base, Bull, and Bear operating scenarios?
-6. What illustrative valuation range follows from those assumptions, and which
-   inputs matter most?
-
-The completed workflow combines SEC filing discovery, deterministic XBRL selection,
-face-statement reconciliation, historical analysis, a five-year consolidated
-forecast, a Python DCF, and a reviewer-facing Excel translation.
+Starting with Nike's SEC filings, I reconciled five years of historical results,
+developed three FY2027-FY2031 operating cases, and carried them through a Python DCF
+and formula-driven Excel model.
 
 ## Key findings
 
@@ -92,17 +89,19 @@ of enterprise value in every scenario and is therefore a material analytical
 warning. See the [valuation methodology](docs/valuation_methodology.md) and
 [valuation validation output](outputs/model_exports/valuation_validation_summary.csv).
 
-## What the project demonstrates
+## What I built
 
-- Financial-statement analysis and accounting-definition discipline
-- SEC filing and XBRL data engineering with deterministic fact selection
-- Documented source lineage across 339 manifest observations
-- Decimal-based historical, forecast, and valuation calculations
-- Three coherent operating scenarios with 105 approved driver assumptions
-- FCFF, bottom-up WACC, terminal-value, and enterprise-to-equity bridge mechanics
-- A native-formula Excel model reconciled to an authoritative Python implementation
-- Automated validation, deterministic artifact generation, and 105 project tests
-- Clear communication of assumptions, limitations, and non-recommendation scope
+- A reconciled five-year financial dataset with deterministic XBRL fact selection
+  and a 339-row source manifest
+- Reusable, Decimal-based Python modules for historical analysis, forecasting, and
+  valuation
+- Three FY2027-FY2031 operating scenarios built from 105 approved driver assumptions
+- An FCFF DCF with a bottom-up WACC, terminal bridge, enterprise-to-equity bridge,
+  and sensitivity analysis
+- A native-formula Excel model that exposes the calculations and reconciles to the
+  Python results
+- Documentation of the accounting choices, source lineage, limitations, and
+  reproduction steps
 
 ## Analytical workflow
 
@@ -119,7 +118,7 @@ Historical KPIs, notebook, and static charts
 Approved FY2027-FY2031 Base / Bull / Bear scenarios
         |
         v
-Authoritative Python DCF + sensitivity outputs
+Python DCF + sensitivity outputs
         |
         v
 Formula-driven Excel model + independent workbook checks
@@ -138,12 +137,12 @@ the workflow.
 | [`config/`](config/) | XBRL mappings, scenario assumptions, and valuation inputs |
 | [`src/nike_financial_analysis/`](src/nike_financial_analysis/) | Reusable extraction, analysis, forecast, valuation, and workbook logic |
 | [`notebooks/`](notebooks/) | Rendered historical and scenario narratives |
-| [`outputs/`](outputs/) | Reviewer-ready tables, charts, and valuation exports |
+| [`outputs/`](outputs/) | Published tables, charts, and valuation exports |
 | [`model/nike_valuation_model.xlsx`](model/nike_valuation_model.xlsx) | Verified formula-driven Excel model |
 | [`docs/`](docs/) | Walkthrough, methodology, decisions, definitions, and limitations |
-| [`tests/`](tests/) | Deterministic calculation, artifact, notebook, and workbook tests |
+| [`tests/`](tests/) | Calculation, artifact, notebook, and workbook tests |
 
-For an end-to-end explanation, read the
+For a detailed explanation of the model, read the
 [project walkthrough](docs/project_walkthrough.md). Detailed references include the
 [methodology](docs/methodology.md), [data dictionary](docs/data_dictionary.md),
 [decision log](docs/decision_log.md), and [limitations](docs/limitations.md).
@@ -210,9 +209,9 @@ native Excel formulas, a five-by-five Base-case sensitivity table, an `XNPV`
 cross-check, and 161 passing blocking checks. Three expected warnings identify
 terminal-value dependence.
 
-Python remains the authoritative reconciliation benchmark. The workbook has no
-external workbook links, live data connections, or macros. GitHub cannot preview
-all Excel functionality, so download the file for full inspection.
+Python remains the calculation source of record and reconciliation benchmark. The
+workbook has no external workbook links, live data connections, or macros. GitHub
+cannot preview all Excel functionality, so download the file for full inspection.
 
 Regeneration requires Windows desktop Excel:
 
@@ -246,19 +245,22 @@ publishes the workbook only after blocking checks pass. See the
 
 ## Validation and quality controls
 
-- Five unique fiscal periods and deterministic annual XBRL selection
-- Face-statement reconciliation and a 339-row source manifest
-- 17 historical data-quality checks with no warnings or failures
-- Status propagation that prevents unresolved facts entering calculations
-- Exact Decimal formula tests for historical KPIs, forecasts, and the Python DCF
-- Deterministic table, chart, notebook, and valuation artifact generation
-- Protected text-artifact checks accept Git-equivalent LF/CRLF checkouts while
-  continuing to reject substantive content changes
-- 161 passing Excel blocking checks, three expected warnings, and zero failures
-- Exact explicit-PV versus native `XNPV` reconciliation
-- Excel-to-Python reconciliation within documented tolerances
+The main controls cover the points where a plausible-looking error could enter the
+analysis:
+
+- Annual XBRL selection, fiscal-period mapping, units, signs, and face-statement
+  reconciliation
+- Status propagation that prevents unresolved facts from entering calculations
+- Exact Decimal formula tests and repeatable table, chart, notebook, and valuation
+  generation
+- Protected-text checks that allow Git-equivalent LF/CRLF checkouts but reject
+  substantive changes
+- Explicit-PV versus native `XNPV` reconciliation and Excel-to-Python comparison
 - Privacy, path, package-link, formula-cache, and protected-artifact checks
-- 105 passing automated tests in the locked environment
+
+The locked environment passes 105 automated tests. The historical dataset also
+passes 17 data-quality checks with no warnings or failures; workbook results are
+covered by the checks described in the Excel section above.
 
 ## Limitations
 
@@ -273,10 +275,9 @@ See [limitations](docs/limitations.md) for the complete phase-by-phase discussio
 
 ## Future work
 
-Reasonable extensions include a refreshed filing period, consistent segment or
+Possible extensions include a refreshed filing period, consistent segment or
 geographic analysis where disclosures permit, and a separately sourced comparable-
-company valuation cross-check. These are optional extensions, not requirements for
-the completed project's reproducibility or internal validation.
+company valuation cross-check. They remain outside the current scope.
 
 ## Independent-project scope
 
