@@ -7,11 +7,14 @@ import csv
 from dataclasses import asdict, dataclass
 from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-import hashlib
 from pathlib import Path
 from typing import Iterable, Mapping
 
-from nike_financial_analysis.analysis import find_repository_root, verify_phase2_hashes
+from nike_financial_analysis.analysis import (
+    find_repository_root,
+    hash_matches_expected,
+    verify_phase2_hashes,
+)
 from nike_financial_analysis.forecast_validation import (
     FORECAST_YEARS,
     REQUIRED_DRIVERS,
@@ -88,26 +91,17 @@ class ForecastModel:
     checks: tuple[ForecastCheck, ...]
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 def verify_phase3_hashes(repository_root: Path) -> dict[str, str]:
-    """Protect every committed Phase 3 table, chart, and notebook."""
+    """Protect Phase 3 content while allowing Git text-line normalization."""
 
     verified: dict[str, str] = {}
     for relative, expected in PROTECTED_PHASE3_HASHES.items():
         path = repository_root / relative
         if not path.is_file():
             raise FileNotFoundError(f"Required Phase 3 artifact is missing: {relative}")
-        actual = _sha256(path)
-        if actual != expected:
+        if not hash_matches_expected(path, expected):
             raise ValueError(f"Protected Phase 3 artifact changed: {relative}")
-        verified[relative.as_posix()] = actual
+        verified[relative.as_posix()] = expected
     return verified
 
 

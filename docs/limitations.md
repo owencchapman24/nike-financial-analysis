@@ -116,7 +116,8 @@
 - No forecast interest, debt repayment, dividends, repurchases, diluted shares, or EPS
 - No probability-weighted scenario, peer comparison, Monte Carlo simulation, or
   investment recommendation
-- No Phase 5 Excel model
+- Phase 4 itself contains no valuation or Excel model; those are separate Phase 5
+  deliverables.
 
 ## Phase 5A valuation limitations
 

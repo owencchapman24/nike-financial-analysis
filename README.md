@@ -1,184 +1,197 @@
-# Nike Financial Analysis
+# Nike Financial Analysis and DCF Valuation
 
-Reproducible Python analysis of Nike's FY2022-FY2026 financial performance,
-FY2027-FY2031 operating scenarios, and a bounded DCF valuation using reconciled
-SEC data and auditable calculation lineage.
+Independent portfolio project covering Nike's FY2022-FY2026 reported performance,
+FY2027-FY2031 operating scenarios, and an illustrative discounted-cash-flow
+valuation. Historical accounting data is reconciled to official SEC filings and
+carried through auditable Python calculations and a formula-driven Excel model.
 
-> **Project status:** The SEC data foundation, reconciled FY2022-FY2026 historical
-> dataset, recruiter-facing historical analysis, and documented FY2027-FY2031
-> operating scenarios, Python DCF valuation foundation, and formula-driven Excel
-> valuation model are implemented.
+| Scope item | Date or period |
+|---|---|
+| Historical analysis | FY2022-FY2026 |
+| Operating scenarios | FY2027-FY2031 |
+| DCF model date | May 31, 2026 |
+| Information cutoff | September 7, 2026 |
+| Reference market price | $38.40 on September 4, 2026 |
 
-This independent portfolio analysis combines historical results with documented
-project analyst scenarios. It is not an investment recommendation.
+**Bottom line:** Revenue reached $51.4 billion in FY2024 before falling 9.7% to
+$46.4 billion in FY2026. Derived operating margin declined from 14.3% in FY2022 to
+8.2% in FY2026, and FY2026 free cash flow was 67.0% below its FY2024 peak. The
+project's three approved operating scenarios produce illustrative values of $29.44
+to $58.30 per diluted-proxy share; the range is highly dependent on terminal value.
 
-## Project objective
+**Start here:** [Download the Excel valuation model](model/nike_valuation_model.xlsx)
+· [Read the project walkthrough](docs/project_walkthrough.md)
+· [Open the historical notebook](notebooks/01_historical_analysis.ipynb)
+· [Open the scenario notebook](notebooks/02_scenario_forecast.ipynb)
+· [Inspect the valuation outputs](outputs/model_exports/valuation_summary.csv)
 
-The completed project will answer six business questions:
+This is historical and scenario-based analysis, not an investment recommendation
+or price target.
 
-1. How have Nike's revenue, profitability, and cash generation changed?
-2. Which reported operating and cost trends accompany changes in margins?
-3. What do inventory, receivables, working capital, and cash conversion suggest?
-4. How effectively has accounting income translated into cash flow?
-5. What assumptions support coherent base, bull, and bear operating scenarios?
-6. What valuation range follows from those assumptions, and which assumptions matter
-   most?
+## Project overview
 
-The historical analysis addresses the first four questions, Phase 4 addresses the
-fifth with project analyst operating scenarios, and Phase 5A adds a bounded DCF
-range and sensitivity analysis for the sixth. None is an investment recommendation.
+The project answers six connected questions:
 
-## Historical scope and data foundation
+1. How did Nike's revenue, profitability, and cash generation change?
+2. Which reported operating and cost trends accompanied margin changes?
+3. What do inventory, receivables, liquidity, and cash conversion indicate?
+4. How effectively did accounting income translate into cash flow?
+5. What assumptions support coherent Base, Bull, and Bear operating scenarios?
+6. What illustrative valuation range follows from those assumptions, and which
+   inputs matter most?
 
-The analysis covers Nike fiscal years FY2022-FY2026, each ending May 31. The Python
-pipeline:
+The completed workflow combines SEC filing discovery, deterministic XBRL selection,
+face-statement reconciliation, historical analysis, a five-year consolidated
+forecast, a Python DCF, and a reviewer-facing Excel translation.
 
-- verifies Nike's ticker and CIK through official SEC data;
-- selects five unique annual 10-K periods;
-- retrieves and caches SEC Company Facts and filing evidence;
-- applies deterministic form, period, unit, taxonomy, duplicate, and amendment rules;
-- reconciles selected observations to consolidated face statements;
-- preserves competing facts and calculation lineage in a source manifest; and
-- blocks uncertain or missing inputs from analytical calculations.
+## Key findings
 
-The committed [historical dataset](data/processed/nike_financials.csv) is accompanied
-by a detailed [source manifest](data/metadata/source_manifest.csv) and
-[validation summary](data/metadata/validation_summary.csv).
+- **Revenue:** FY2024 revenue peaked at $51,362 million, then declined $4,964
+  million to $46,398 million in FY2026. FY2026 finished 0.7% below FY2022, a -0.2%
+  four-interval CAGR.
+- **Profitability:** Gross margin fell from 46.0% in FY2022 to 42.9% in FY2026.
+  Derived operating margin fell from 14.3% to 8.2%, while SG&A rose from 31.7% to
+  34.7% of revenue. Derived operating income is gross profit less total SG&A; it is
+  not a Nike-reported subtotal or segment EBIT.
+- **Cash generation:** Free cash flow fell 67.0% from $6,617 million in FY2024 to
+  $2,184 million in FY2026. FY2026 FCF margin was 4.7%, and operating cash flow was
+  0.92x net income.
+- **Liquidity and working capital:** Cash plus short-term investments declined from
+  $12,997 million to $9,027 million between FY2022 and FY2026. The current ratio
+  moved from 2.63x to 1.96x, and the receivables-days proxy increased from 36.0 days
+  in FY2025 to 41.9 days in FY2026.
+- **Capital structure:** Interest-bearing debt declined from $9,430 million to
+  $7,942 million, but the net-cash buffer narrowed from $3,567 million to $1,085
+  million. FY2026 operating lease liabilities of $3,091 million are shown
+  separately from debt.
 
-## Historical findings
+![Nike revenue and annual growth from FY2022 through FY2026](outputs/charts/01_revenue_and_growth.png)
 
-- Revenue reached $51,362 million in FY2024 before declining $4,964 million, or
-  9.7%, to $46,398 million in FY2026. That left FY2026 revenue $312 million, or 0.7%,
-  below FY2022, corresponding to a -0.2% four-interval CAGR.
-- Gross margin decreased from 46.0% to 42.9%, down 3.1 percentage points. Derived
-  operating margin decreased from 14.3% to 8.2%, down 6.1 points, and net margin
-  decreased from 12.9% to 6.7%, down 6.2 points. Over the same period, SG&A increased
-  from 31.7% to 34.7% of revenue, up 3.0 points.
-- Free cash flow declined $4,433 million, or 67.0%, from its $6,617 million FY2024
-  peak to $2,184 million in FY2026. FY2026 FCF margin was 4.7%, and operating cash
-  flow equaled 0.92x net income.
-- Cash plus short-term investments decreased from $12,997 million to $9,027 million,
-  the current ratio moved from 2.63x to 1.96x, and net working capital decreased from
-  $17,483 million to $12,056 million. FY2026 receivables grew 25.7% while revenue grew
-  0.2%; the receivables-days proxy increased from 36.0 to 41.9 days.
-- Interest-bearing debt decreased from $9,430 million to $7,942 million, while the
-  net-cash buffer narrowed from $3,567 million to $1,085 million. FY2026 operating
-  lease liabilities of $3,091 million remain separate from debt.
+Revenue finished close to its FY2022 level only after reaching a substantially
+higher FY2024 peak. The [historical findings](docs/historical_findings.md) and
+[historical notebook](notebooks/01_historical_analysis.ipynb) provide the complete
+five-chart analysis and calculation detail.
 
-![Nike revenue and annual growth, FY2022-FY2026](outputs/charts/01_revenue_and_growth.png)
+## Illustrative valuation summary
 
-![Nike profitability margins, FY2022-FY2026](outputs/charts/02_margin_trends.png)
+All three cases use the approved FY2027-FY2031 operating scenarios, a
+formula-derived 8.4874% WACC, a common 2.5% perpetual-growth rate, and exact
+fiscal-year-end discounting.
 
-The complete narrative, all five figures, and supporting tables appear in the
-[historical-analysis notebook](notebooks/01_historical_analysis.ipynb). A shorter
-review copy is maintained in [historical findings](docs/historical_findings.md).
+| Scenario | Illustrative value/share | Comparison with $38.40 reference | Terminal value / EV |
+|---|---:|---:|---:|
+| Bear | $29.44 | 23.3% below | 76.7% |
+| Base | $46.81 | 21.9% above | 78.2% |
+| Bull | $58.30 | 51.8% above | 79.1% |
 
-## FY2027-FY2031 operating scenarios
+![Illustrative Bear, Base, and Bull valuation outputs compared with the separately dated reference price](outputs/charts/10_scenario_valuation.png)
 
-Phase 4 translates the reconciled history into base, bull, and bear consolidated
-operating forecasts. These are documented project analyst scenarios, not Nike
-guidance, consensus estimates, probabilities, or price targets. The information
-cutoff is September 7, 2026; Nike's subsequently scheduled FY2027 first-quarter
-results are excluded.
+These values are conditional scenario outputs, not probability-weighted outcomes,
+stock-price forecasts, or recommendations. Terminal value represents more than 75%
+of enterprise value in every scenario and is therefore a material analytical
+warning. See the [valuation methodology](docs/valuation_methodology.md) and
+[valuation validation output](outputs/model_exports/valuation_validation_summary.csv).
 
-- Base revenue declines 2.0% in FY2027, then recovers to USD 51,421 million in
-  FY2031. Derived operating margin moves from 7.3% to 12.0%, and FCFF reaches
-  USD 4,773 million.
-- Bull revenue reaches USD 55,337 million in FY2031, with a 14.0% derived operating
-  margin and USD 5,994 million of FCFF. Higher growth is paired with higher capex.
-- Bear revenue declines through FY2028 and finishes at USD 46,337 million in FY2031.
-  Derived operating margin reaches 8.2%, and FCFF reaches USD 2,988 million.
+## What the project demonstrates
 
-FY2026 reported gross margin remains 42.9%. Nike disclosed that the year included
-an approximately 210-basis-point IEEPA tariff-recovery benefit and would have been
-approximately 40.8% excluding that benefit. The forecast does not replace the
-reported actual; FY2027 scenario margins imply different degrees of underlying
-operational recovery.
+- Financial-statement analysis and accounting-definition discipline
+- SEC filing and XBRL data engineering with deterministic fact selection
+- Documented source lineage across 339 manifest observations
+- Decimal-based historical, forecast, and valuation calculations
+- Three coherent operating scenarios with 105 approved driver assumptions
+- FCFF, bottom-up WACC, terminal-value, and enterprise-to-equity bridge mechanics
+- A native-formula Excel model reconciled to an authoritative Python implementation
+- Automated validation, deterministic artifact generation, and 105 project tests
+- Clear communication of assumptions, limitations, and non-recommendation scope
 
-![Nike actual and scenario revenue paths](outputs/charts/06_forecast_revenue.png)
+## Analytical workflow
 
-![Nike historical bridge and scenario FCFF](outputs/charts/08_forecast_fcff.png)
-
-See the [scenario-forecast notebook](notebooks/02_scenario_forecast.ipynb),
-[forecast methodology](docs/forecast_methodology.md),
-[scenario rationale](docs/scenario_rationale.md),
-[documented assumption register](config/scenario_assumptions.csv), and
-[forecast source register](config/forecast_sources.csv).
-
-## Phase 5A DCF valuation foundation
-
-The bounded Python DCF values the three approved operating scenarios independently.
-It uses a May 31, 2026 model date, exact fiscal-year-end cash-flow dates, a
-formula-derived 8.4874% WACC (8.5% displayed), and a common 2.5% perpetual-growth
-rate. Scenario differences come from the approved operating forecasts.
-
-The illustrative values are USD 29.44 for Bear, USD 46.81 for Base, and USD 58.30
-for Bull per diluted-proxy share. They are compared with the separately dated
-September 4, 2026 reference price of USD 38.40; they are not price targets or
-investment recommendations. Terminal-value dependence is disclosed in the
-validation output.
-
-See the [DCF valuation methodology](docs/valuation_methodology.md),
-[valuation assumptions](config/valuation_assumptions.csv),
-[valuation sources](config/valuation_sources.csv), and
-[valuation summary](outputs/model_exports/valuation_summary.csv).
-
-[View the illustrative scenario valuation chart](outputs/charts/10_scenario_valuation.png).
-
-## Phase 5B Excel valuation model
-
-The [Excel valuation model](model/nike_valuation_model.xlsx) translates the
-authoritative Phase 5A Python calculations into eight visible, formula-driven
-worksheets. A Bear/Base/Bull selector controls the detailed DCF, while all three
-scenario values and the Base-case WACC/perpetual-growth sensitivity remain visible.
-The workbook uses exact fiscal-year-end dates, a native `XNPV` cross-check, and an
-independent explicit date-exponent calculation.
-
-Desktop Excel recalculation is part of the fail-closed build: the tracked workbook
-is published only after cached formulas, Python reconciliation, links, package
-metadata, and model checks pass. See the [Excel model guide](docs/excel_model_guide.md)
-for the worksheet map, color conventions, calculation flow, and limitations.
-
-## Accounting and analytical conventions
-
-- Derived operating income equals gross profit less total selling and administrative
-  expense. Nike does not report this consolidated subtotal, and it is not segment
-  EBIT.
-- Depreciation and amortization uses `Depreciation` for FY2022 and
-  `DepreciationDepletionAndAmortization` for FY2023-FY2026. The tag transition remains
-  visible in the source manifest.
-- Interest-bearing debt equals notes payable or short-term borrowings plus current
-  and noncurrent long-term debt. FY2026 short-term borrowings are a filing-supported
-  documented zero.
-- Operating lease liabilities remain separate from interest-bearing debt.
-- Capital expenditures are positive investment amounts. Phase 3 historical free
-  cash flow equals operating cash flow less capital expenditures. Phase 4 FCFF
-  equals NOPAT plus D&A less capital expenditures and the change in operating NWC.
-  These related measures are not interchangeable.
-- Cash conversion is a ratio in `x`, not a percentage.
-- Inventory days and `receivables_days_proxy` use average balances and a consistent
-  365-day analytical convention. FY2022 is not applicable because FY2021 opening
-  balances are not in the committed dataset. The receivables measure uses total
-  revenue rather than disclosed credit sales and is therefore not called DSO.
-- Signed net debt equals interest-bearing debt less cash and short-term investments.
-  A negative value means net cash; operating leases are excluded.
-
-## Windows PowerShell setup
-
-The environment is tested with uv-managed CPython 3.14.5. From a fresh clone:
-
-```powershell
-uv sync --locked --python 3.14.5
-.\.venv\Scripts\Activate.ps1
+```text
+SEC filings and XBRL facts
+        |
+        v
+Reconciled FY2022-FY2026 dataset + source manifest
+        |
+        v
+Historical KPIs, notebook, and static charts
+        |
+        v
+Approved FY2027-FY2031 Base / Bull / Bear scenarios
+        |
+        v
+Authoritative Python DCF + sensitivity outputs
+        |
+        v
+Formula-driven Excel model + independent workbook checks
 ```
 
-`pyproject.toml` defines dependencies and `uv.lock` pins the resolved environment.
-There is intentionally no separately maintained `requirements.txt`.
+Reported facts, filing-supported documented zeros, project-derived metrics, analyst
+assumptions, and calculated valuation outputs remain separately labelled throughout
+the workflow.
 
-## Reproduce the historical data
+## Repository guide
 
-SEC retrieval requires a descriptive local user agent. Copy `.env.example` to
-`.env`, replace the placeholder locally, and never commit `.env`:
+| Location | Purpose |
+|---|---|
+| [`data/processed/`](data/processed/) | Reconciled historical dataset |
+| [`data/metadata/`](data/metadata/) | Source manifest and validation results |
+| [`config/`](config/) | XBRL mappings, scenario assumptions, and valuation inputs |
+| [`src/nike_financial_analysis/`](src/nike_financial_analysis/) | Reusable extraction, analysis, forecast, valuation, and workbook logic |
+| [`notebooks/`](notebooks/) | Rendered historical and scenario narratives |
+| [`outputs/`](outputs/) | Reviewer-ready tables, charts, and valuation exports |
+| [`model/nike_valuation_model.xlsx`](model/nike_valuation_model.xlsx) | Verified formula-driven Excel model |
+| [`docs/`](docs/) | Walkthrough, methodology, decisions, definitions, and limitations |
+| [`tests/`](tests/) | Deterministic calculation, artifact, notebook, and workbook tests |
+
+For an end-to-end explanation, read the
+[project walkthrough](docs/project_walkthrough.md). Detailed references include the
+[methodology](docs/methodology.md), [data dictionary](docs/data_dictionary.md),
+[decision log](docs/decision_log.md), and [limitations](docs/limitations.md).
+
+## How to reproduce the project
+
+### Requirements
+
+- Git
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- uv-managed CPython 3.14.5
+- Windows desktop Microsoft Excel only when regenerating the verified `.xlsx` model
+
+From Windows PowerShell:
+
+```powershell
+git clone https://github.com/owencchapman24/nike-financial-analysis.git
+Set-Location nike-financial-analysis
+uv sync --locked --python 3.14.5
+uv run pytest
+```
+
+The locked Python environment and all commands except Excel recalculation are
+cross-platform. The committed datasets, notebooks, charts, CSV outputs, and
+recalculated workbook are ready to inspect without rebuilding.
+
+### Deterministic offline rebuild
+
+The following commands use committed inputs and require neither network access nor
+`.env`:
+
+```powershell
+uv run nike-historical-analysis
+uv run nike-execute-notebook notebooks/01_historical_analysis.ipynb --in-place
+uv run nike-scenario-forecast
+uv run nike-execute-notebook notebooks/02_scenario_forecast.ipynb --in-place
+uv run nike-dcf-valuation
+uv run pytest
+```
+
+They regenerate the historical tables and charts, both rendered notebooks, the
+scenario outputs, and the Python valuation exports.
+
+### Optional SEC retrieval
+
+Refreshing primary-source data is a separate, network-dependent workflow. Copy the
+placeholder file, add a descriptive SEC user agent locally, and never commit the
+resulting `.env`:
 
 ```powershell
 Copy-Item .env.example .env
@@ -186,57 +199,22 @@ uv run nike-sec-filings --ticker NKE --count 5
 uv run nike-historical-data
 ```
 
-The SEC client never prints the configured value. It uses conservative throttling,
-timeouts, retries, and an ignored cache under `data/raw/sec/`.
+The SEC client uses conservative throttling, timeouts, retries, and an ignored cache
+under `data/raw/sec/`. It does not print the configured user-agent value.
 
-## Reproduce the historical analysis
+## Excel workbook usage
 
-Phase 3 requires no network access or `.env`. It reads only the committed Phase 2
-files:
+[Download `nike_valuation_model.xlsx`](model/nike_valuation_model.xlsx) and select
+Bear, Base, or Bull in `Cover!D6`. The workbook contains eight visible worksheets,
+native Excel formulas, a five-by-five Base-case sensitivity table, an `XNPV`
+cross-check, and 161 passing blocking checks. Three expected warnings identify
+terminal-value dependence.
 
-```powershell
-uv run nike-historical-analysis
-uv run nike-execute-notebook notebooks/01_historical_analysis.ipynb --in-place
-uv run pytest
-```
+Python remains the authoritative reconciliation benchmark. The workbook has no
+external workbook links, live data connections, or macros. GitHub cannot preview
+all Excel functionality, so download the file for full inspection.
 
-The artifact command rebuilds:
-
-- [historical summary](outputs/tables/historical_summary.csv)
-- [audit-friendly KPI table](outputs/tables/historical_kpis.csv)
-- [five static charts](outputs/charts/)
-
-## Reproduce the operating scenarios
-
-Phase 4 also requires no network access or `.env`. It protects the committed Phase
-2-3 artifacts before calculating the forecast:
-
-```powershell
-uv run nike-scenario-forecast
-uv run nike-execute-notebook notebooks/02_scenario_forecast.ipynb --in-place
-uv run pytest
-```
-
-The command rebuilds the long-form forecast, readable scenario summary, resolved
-assumption audit, validation summary, and four static forecast charts. It does not
-perform valuation.
-
-## Reproduce the Phase 5A valuation
-
-Phase 5A requires no network access or `.env`:
-
-```powershell
-uv run nike-dcf-valuation
-uv run pytest
-```
-
-The command writes five CSV exports under `outputs/model_exports/` and one static
-chart under `outputs/charts/`.
-
-## Rebuild and verify the Excel model
-
-Phase 5B requires desktop Microsoft Excel on Windows for COM recalculation. It uses
-only committed local inputs and makes no network request:
+Regeneration requires Windows desktop Excel:
 
 ```powershell
 uv run nike-excel-model
@@ -244,33 +222,66 @@ uv run nike-excel-model --verify-only
 uv run pytest tests/test_excel_model.py tests/test_excel_model_artifacts.py
 ```
 
-The build creates a temporary candidate, recalculates it in a dedicated hidden Excel
-instance, reconciles it to Python, and atomically publishes the verified workbook.
-Do not treat a pre-recalculation XlsxWriter cache as Excel verification.
+The builder creates a temporary candidate, performs a full recalculation in a
+dedicated hidden Excel instance, verifies formula caches and Python parity, and
+publishes the workbook only after blocking checks pass. See the
+[Excel model guide](docs/excel_model_guide.md).
 
-## Repository guide
+## Methodology and source conventions
 
-- `src/nike_financial_analysis/` — SEC access, selection, calculations, charts, and
-  notebook execution
-- `data/processed/` — committed reconciled historical data
-- `data/metadata/` — filing index, provenance, and validation results
-- `outputs/` — generated historical, forecast, and valuation tables and figures
-- `model/` — verified formula-driven Excel valuation model
-- `notebooks/` — rendered analytical narrative
-- `docs/` — methodology, data dictionary, decisions, findings, and limitations
-- `tests/` — deterministic fixtures and pipeline, calculation, chart, artifact, and
-  notebook tests
+- SEC EDGAR filings and SEC XBRL APIs are the primary accounting sources.
+- Historical facts are selected using fiscal period, form, duration, unit,
+  accession, amendment, and duplicate-resolution rules; uncertain facts are blocked.
+- Financial-statement values use USD millions. Capital expenditures are positive
+  investment amounts.
+- Derived operating income equals gross profit less total SG&A. It is not a
+  Nike-reported consolidated subtotal or segment EBIT.
+- Historical free cash flow equals operating cash flow less capital expenditures.
+  Forecast FCFF equals NOPAT plus D&A less capex and the change in operating NWC.
+- Interest-bearing debt excludes operating leases. Lease expense remains operating,
+  and lease liabilities remain memorandum-only in the valuation.
+- The headline share denominator is a documented diluted-share proxy; basic shares
+  provide a cross-check.
+- The model date, information cutoff, and reference-price date remain distinct.
 
-See the [methodology](docs/methodology.md), [data dictionary](docs/data_dictionary.md),
-[decision log](docs/decision_log.md), and [limitations](docs/limitations.md) for the
-full audit trail.
+## Validation and quality controls
 
-## Limitations and future work
+- Five unique fiscal periods and deterministic annual XBRL selection
+- Face-statement reconciliation and a 339-row source manifest
+- 17 historical data-quality checks with no warnings or failures
+- Status propagation that prevents unresolved facts entering calculations
+- Exact Decimal formula tests for historical KPIs, forecasts, and the Python DCF
+- Deterministic table, chart, notebook, and valuation artifact generation
+- Protected text-artifact checks accept Git-equivalent LF/CRLF checkouts while
+  continuing to reject substantive content changes
+- 161 passing Excel blocking checks, three expected warnings, and zero failures
+- Exact explicit-PV versus native `XNPV` reconciliation
+- Excel-to-Python reconciliation within documented tolerances
+- Privacy, path, package-link, formula-cache, and protected-artifact checks
+- 105 passing automated tests in the locked environment
 
-Five annual observations cannot show quarterly seasonality or establish causation.
-Several project conventions, including derived operating income, the aggregate
-operating-NWC proxy, the D&A tag transition, the receivables-days proxy, and
-operating-lease exclusion, require care when interpreting the figures. Phase 5B
-translates the bounded Python DCF into Excel without changing its assumptions or
-authoritative results. Peer valuation, machine learning, stock-price prediction,
-and interactive dashboards remain outside version one.
+## Limitations
+
+Five annual observations cannot establish causation or show quarterly seasonality.
+The operating forecast is consolidated rather than segment-based, and all three
+scenarios depend on project analyst assumptions. The operating-NWC measure and
+diluted-share count are documented proxies. WACC depends on market inputs and beta
+proxies, and terminal value exceeds 75% of enterprise value in every scenario.
+Operating leases remain outside net debt because lease expense remains operating.
+
+See [limitations](docs/limitations.md) for the complete phase-by-phase discussion.
+
+## Future work
+
+Reasonable extensions include a refreshed filing period, consistent segment or
+geographic analysis where disclosures permit, and a separately sourced comparable-
+company valuation cross-check. These are optional extensions, not requirements for
+the completed project's reproducibility or internal validation.
+
+## Independent-project scope
+
+This independent portfolio analysis evaluates Nike's historical performance,
+project analyst operating scenarios, and illustrative valuation using reproducible
+data derived primarily from official SEC filings. It is not affiliated with Nike,
+and it is not an investment recommendation, price target, or prediction of future
+stock performance.

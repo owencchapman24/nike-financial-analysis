@@ -280,3 +280,27 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
   independent check rows, and a recalculation sentinel with an invalid initial cache.
 - **Boundary:** No macros, external links, live data, probabilities, new assumptions,
   or Phase 6 work.
+
+## D030 — Package the completed analysis for public portfolio review
+
+- **Status:** Accepted for Phase 6 implementation
+- **Decision:** Use the README as the concise recruiter-facing entry point and add
+  one public project walkthrough linking the existing detailed methodology,
+  decisions, outputs, notebooks, and workbook guide.
+- **Presentation:** Surface the historical trajectory, illustrative valuation range,
+  workbook download, validation evidence, and reproduction path without changing
+  analytical results or presenting the valuation as a recommendation.
+- **Boundary:** Keep private interview preparation and knowledge testing outside the
+  public repository for Phase 7.
+
+## D031 — Make protected-text verification portable across Git checkouts
+
+- **Status:** Accepted during the Phase 6 fresh-clone gate
+- **Decision:** Treat LF and CRLF forms of protected CSV and notebook artifacts as
+  hash-equivalent only when their normalized text content is identical.
+- **Reason:** The repository enforces LF through `.gitattributes`, while earlier
+  approved hashes were recorded from a Windows CRLF working tree. Raw-byte-only
+  comparison therefore rejected a valid fresh clone even though Git stored the
+  same content.
+- **Control:** Binary artifacts remain byte-exact, and a regression test confirms
+  that an actual value change still fails verification.

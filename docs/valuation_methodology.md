@@ -9,8 +9,8 @@ closing price is a separately dated reference comparison, not a price target or
 investment recommendation.
 
 The Python model is the authoritative Phase 5A calculation engine. It creates
-auditable CSV exports that a later, separately approved Excel phase can reproduce.
-Phase 5A does not create an Excel workbook.
+auditable CSV exports. The separately documented Phase 5B workbook translates and
+reconciles to this calculation rather than replacing it.
 
 ## Input lineage
 

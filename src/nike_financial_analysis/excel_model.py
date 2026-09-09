@@ -24,7 +24,11 @@ import openpyxl
 import xlsxwriter
 from xlsxwriter.utility import xl_col_to_name
 
-from nike_financial_analysis.analysis import find_repository_root, verify_phase2_hashes
+from nike_financial_analysis.analysis import (
+    find_repository_root,
+    hash_matches_expected,
+    verify_phase2_hashes,
+)
 from nike_financial_analysis.forecast import verify_phase3_hashes
 from nike_financial_analysis.valuation import (
     PROTECTED_PHASE4_HASHES,
@@ -112,26 +116,17 @@ FORMULA_ERRORS = {
 }
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def verify_phase5a_hashes(repository_root: Path) -> dict[str, str]:
-    """Verify committed Phase 5A inputs and generated artifacts."""
+    """Verify Phase 5A content while allowing Git text-line normalization."""
 
     verified: dict[str, str] = {}
     for relative, expected in PROTECTED_PHASE5A_HASHES.items():
         path = repository_root / relative
         if not path.is_file():
             raise FileNotFoundError(f"Required Phase 5A artifact is missing: {relative}")
-        actual = _sha256(path)
-        if actual != expected:
+        if not hash_matches_expected(path, expected):
             raise ValueError(f"Protected Phase 5A artifact changed: {relative}")
-        verified[relative.as_posix()] = actual
+        verified[relative.as_posix()] = expected
     return verified
 
 

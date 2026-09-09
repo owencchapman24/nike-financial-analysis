@@ -71,9 +71,9 @@ ONWC remains elevated, although its FY2027 balance still declines from FY2026.
 
 ## FY2031 endpoints
 
-The FY2031 endpoints are intended to be operating states that a later Phase 5 could
-evaluate for terminal consistency. They are not terminal-value assumptions. Phase 4
-does not specify perpetual growth, return on capital, discount rates, or valuation.
+The FY2031 endpoints are operating states used by the separately documented Phase 5
+terminal bridge. They are not terminal-value assumptions. Phase 4 itself does not
+specify perpetual growth, return on capital, discount rates, or valuation.
 
 ## Evidence boundary
 

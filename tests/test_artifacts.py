@@ -8,6 +8,7 @@ from nike_financial_analysis.analysis import (
     EXPECTED_FISCAL_YEARS,
     PROTECTED_PHASE2_HASHES,
     generate_artifacts,
+    hash_matches_expected,
     verify_phase2_hashes,
 )
 from nike_financial_analysis.charts import CHART_FILENAMES
@@ -43,6 +44,18 @@ def test_phase2_outputs_retain_approved_hashes():
     assert verified == {
         path.as_posix(): expected for path, expected in PROTECTED_PHASE2_HASHES.items()
     }
+
+
+def test_protected_text_hashes_allow_only_line_ending_normalization(tmp_path):
+    path = tmp_path / "protected.csv"
+    crlf_payload = b"metric,value\r\nrevenue,46398\r\n"
+    expected = hashlib.sha256(crlf_payload).hexdigest()
+
+    path.write_bytes(crlf_payload.replace(b"\r\n", b"\n"))
+    assert hash_matches_expected(path, expected)
+
+    path.write_bytes(b"metric,value\nrevenue,46399\n")
+    assert not hash_matches_expected(path, expected)
 
 
 def test_artifact_build_is_complete_and_deterministic(tmp_path):

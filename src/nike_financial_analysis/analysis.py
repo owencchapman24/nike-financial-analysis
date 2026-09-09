@@ -183,20 +183,32 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def hash_matches_expected(path: Path, expected: str) -> bool:
+    """Match content hashes while treating LF and CRLF as equivalent for text."""
+
+    payload = path.read_bytes()
+    candidates = {hashlib.sha256(payload).hexdigest()}
+    if path.suffix.lower() in {".csv", ".ipynb"}:
+        lf_payload = payload.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        crlf_payload = lf_payload.replace(b"\n", b"\r\n")
+        candidates.add(hashlib.sha256(lf_payload).hexdigest())
+        candidates.add(hashlib.sha256(crlf_payload).hexdigest())
+    return expected in candidates
+
+
 def verify_phase2_hashes(repository_root: Path) -> dict[str, str]:
-    """Confirm that all protected Phase 2 outputs remain byte-for-byte unchanged."""
+    """Confirm protected Phase 2 content, allowing Git text-line normalization."""
 
     verified: dict[str, str] = {}
     for relative_path, expected in PROTECTED_PHASE2_HASHES.items():
         path = repository_root / relative_path
         if not path.is_file():
             raise FileNotFoundError(f"Required Phase 2 input is missing: {relative_path}")
-        actual = _sha256(path)
-        if actual != expected:
+        if not hash_matches_expected(path, expected):
             raise ValueError(
                 f"Protected Phase 2 file changed unexpectedly: {relative_path}"
             )
-        verified[relative_path.as_posix()] = actual
+        verified[relative_path.as_posix()] = expected
     return verified
 
 
