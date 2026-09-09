@@ -267,6 +267,16 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
 - **Shares:** Use 1,484.698703 million diluted-proxy shares for headline value and
   1,483.498703 million basic shares only as a denominator cross-check.
 
-## Decisions still deferred after Phase 5A
+## D029 — Translate the authoritative DCF into a formula-driven Excel model
 
-- Formula-driven Excel valuation-model design and workbook presentation
+- **Status:** Accepted by project owner
+- **Decision:** Build eight visible worksheets with XlsxWriter, recalculate the
+  temporary candidate through a dedicated desktop Excel instance, and inspect it
+  read-only with openpyxl before atomic publication.
+- **Authority:** Phase 5A Python outputs remain authoritative. Workbook formulas must
+  reconcile rather than replace or revise those results.
+- **Controls:** Use a Bear/Base/Bull selector, exact fiscal-year-end discounting,
+  native `XNPV` and explicit-PV reconciliation, a formula-driven 5x5 Base sensitivity,
+  independent check rows, and a recalculation sentinel with an invalid initial cache.
+- **Boundary:** No macros, external links, live data, probabilities, new assumptions,
+  or Phase 6 work.

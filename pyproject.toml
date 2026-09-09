@@ -4,15 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nike-financial-analysis"
-version = "0.5.0"
+version = "0.5.1"
 description = "Reproducible Nike financial analysis using primary SEC filing data"
 readme = "README.md"
 requires-python = ">=3.13,<3.15"
 dependencies = [
     "matplotlib>=3.10,<4",
+    "openpyxl>=3.1.5,<4",
     "pandas>=2.3,<4",
     "python-dotenv>=1.1,<2",
     "requests>=2.32,<3",
+    "xlsxwriter>=3.2,<4",
 ]
 
 [dependency-groups]
@@ -30,6 +32,7 @@ nike-historical-analysis = "nike_financial_analysis.analysis:main"
 nike-execute-notebook = "nike_financial_analysis.notebook_runner:main"
 nike-scenario-forecast = "nike_financial_analysis.forecast:main"
 nike-dcf-valuation = "nike_financial_analysis.valuation:main"
+nike-excel-model = "nike_financial_analysis.excel_model:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

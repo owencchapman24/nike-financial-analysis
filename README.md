@@ -6,8 +6,8 @@ SEC data and auditable calculation lineage.
 
 > **Project status:** The SEC data foundation, reconciled FY2022-FY2026 historical
 > dataset, recruiter-facing historical analysis, and documented FY2027-FY2031
-> operating scenarios and Python DCF valuation foundation are implemented. The
-> formula-driven Excel model has not begun.
+> operating scenarios, Python DCF valuation foundation, and formula-driven Excel
+> valuation model are implemented.
 
 This independent portfolio analysis combines historical results with documented
 project analyst scenarios. It is not an investment recommendation.
@@ -125,6 +125,20 @@ See the [DCF valuation methodology](docs/valuation_methodology.md),
 
 [View the illustrative scenario valuation chart](outputs/charts/10_scenario_valuation.png).
 
+## Phase 5B Excel valuation model
+
+The [Excel valuation model](model/nike_valuation_model.xlsx) translates the
+authoritative Phase 5A Python calculations into eight visible, formula-driven
+worksheets. A Bear/Base/Bull selector controls the detailed DCF, while all three
+scenario values and the Base-case WACC/perpetual-growth sensitivity remain visible.
+The workbook uses exact fiscal-year-end dates, a native `XNPV` cross-check, and an
+independent explicit date-exponent calculation.
+
+Desktop Excel recalculation is part of the fail-closed build: the tracked workbook
+is published only after cached formulas, Python reconciliation, links, package
+metadata, and model checks pass. See the [Excel model guide](docs/excel_model_guide.md)
+for the worksheet map, color conventions, calculation flow, and limitations.
+
 ## Accounting and analytical conventions
 
 - Derived operating income equals gross profit less total selling and administrative
@@ -219,6 +233,21 @@ uv run pytest
 The command writes five CSV exports under `outputs/model_exports/` and one static
 chart under `outputs/charts/`.
 
+## Rebuild and verify the Excel model
+
+Phase 5B requires desktop Microsoft Excel on Windows for COM recalculation. It uses
+only committed local inputs and makes no network request:
+
+```powershell
+uv run nike-excel-model
+uv run nike-excel-model --verify-only
+uv run pytest tests/test_excel_model.py tests/test_excel_model_artifacts.py
+```
+
+The build creates a temporary candidate, recalculates it in a dedicated hidden Excel
+instance, reconciles it to Python, and atomically publishes the verified workbook.
+Do not treat a pre-recalculation XlsxWriter cache as Excel verification.
+
 ## Repository guide
 
 - `src/nike_financial_analysis/` — SEC access, selection, calculations, charts, and
@@ -226,6 +255,7 @@ chart under `outputs/charts/`.
 - `data/processed/` — committed reconciled historical data
 - `data/metadata/` — filing index, provenance, and validation results
 - `outputs/` — generated historical, forecast, and valuation tables and figures
+- `model/` — verified formula-driven Excel valuation model
 - `notebooks/` — rendered analytical narrative
 - `docs/` — methodology, data dictionary, decisions, findings, and limitations
 - `tests/` — deterministic fixtures and pipeline, calculation, chart, artifact, and
@@ -240,7 +270,7 @@ full audit trail.
 Five annual observations cannot show quarterly seasonality or establish causation.
 Several project conventions, including derived operating income, the aggregate
 operating-NWC proxy, the D&A tag transition, the receivables-days proxy, and
-operating-lease exclusion, require care when interpreting the figures. Phase 5A
-adds a bounded Python DCF; the formula-driven Excel model remains future work. Peer
-valuation, machine learning, stock-price prediction, and interactive dashboards
-remain outside version one.
+operating-lease exclusion, require care when interpreting the figures. Phase 5B
+translates the bounded Python DCF into Excel without changing its assumptions or
+authoritative results. Peer valuation, machine learning, stock-price prediction,
+and interactive dashboards remain outside version one.

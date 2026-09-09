@@ -350,3 +350,33 @@ cross-check. Bear, Base, and Bull use one 2.5% perpetual-growth rate and no
 probabilities. A direct-growth 5x5 Base-case sensitivity varies WACC and terminal
 growth around the full-precision center. Complete formulas and source lineage are
 documented in the valuation methodology.
+
+## Phase 5B: formula-driven Excel translation
+
+Phase 5B translates the protected Phase 5A valuation into a reviewer-visible Excel
+model. Python remains authoritative; the workbook independently rebuilds the three
+scenario forecasts, bottom-up WACC, exact-date DCF, FY2032 terminal bridge,
+enterprise-to-equity bridge, and Base-case sensitivity with native Excel formulas.
+It does not change any historical value, operating assumption, valuation input, or
+Python result.
+
+The generator uses XlsxWriter to create a temporary candidate. A dedicated hidden
+desktop Excel instance performs a full calculation rebuild, saves only that
+candidate, and exits without terminating other Excel processes. Openpyxl then reads
+formula and data-only states without saving. Publication fails closed unless all
+required caches exist, the recalculation sentinel has replaced its deliberately
+invalid seed, formula errors are absent, Python reconciliation passes, and no
+external link, connection, VBA part, private value, or machine path is present.
+
+The selected-scenario DCF uses explicit 365-day date exponents as the transparent
+primary calculation and native `XNPV` as a cross-check. Both include zero on the May
+31, 2026 model date and the FY2031 FCFF plus terminal value on May 31, 2031. The
+center sensitivity cell uses the full-precision calculated WACC and 2.5% perpetual
+growth rate. Operating leases remain memorandum-only because lease expense remains
+operating.
+
+Desktop Excel may rewrite nonfinancial OOXML metadata during save. The generator
+removes the volatile absolute workbook path, fixes nonfinancial package timestamps,
+and records a semantic digest over sheets, names, tables, formulas, cached results,
+formats, chart references, calculation settings, and package-link counts. Binary
+identity is not required across Excel saves; semantic identity is.

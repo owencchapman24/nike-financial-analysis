@@ -134,3 +134,20 @@
 - The diluted-share denominator is a proxy, not a forecast option schedule.
 - Operating leases remain outside net debt because lease expense remains operating.
 - No unsupported enterprise-to-equity bridge adjustments are included.
+
+## Phase 5B Excel-model limitations
+
+- The workbook translates the approved Python valuation and does not provide an
+  independent second set of economic assumptions. Python remains authoritative.
+- Rebuilding requires Windows desktop Microsoft Excel because formula-cache
+  verification depends on a dedicated COM recalculation. Reviewers without Excel can
+  inspect the committed recalculated workbook but cannot reproduce that step locally.
+- Excel stores numeric calculations as binary floating-point values, while the Python
+  engine uses Decimal arithmetic. Reconciliation therefore uses explicit tolerances;
+  observed differences are expected to be materially smaller than those limits.
+- Terminal value exceeds 75% of enterprise value in all three scenarios. The model
+  displays those observations as warnings rather than suppressing the valuation.
+- The May 31, 2026 model date and September 4, 2026 reference price remain separate.
+  The workbook does not infer a stub-period update.
+- Operating leases are memorandum-only and external workbook links, macros, live
+  data connections, and scenario probabilities are intentionally absent.
