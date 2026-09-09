@@ -47,11 +47,11 @@ PROTECTED_PHASE4_HASHES = {
     Path("outputs/tables/scenario_forecast_summary.csv"): "ddb7937dfb26110072eeed64f0b5949d98bbe4868f949a271fc8830a55f55ab7",
     Path("outputs/tables/scenario_assumptions_resolved.csv"): "78904b3ac77f62b8532c094a4b02ae44d8c0b2c41a57803dfd1e3b721cd5aea5",
     Path("outputs/tables/forecast_validation_summary.csv"): "abd130af36393da68ad4fcf0aeaf482fa68b0d29d26068cab8ef63b1a4b59e8d",
-    Path("outputs/charts/06_forecast_revenue.png"): "f0bde340532c6471952523013f393c076251d95a8b75c0fcb5ced57e38f838d3",
-    Path("outputs/charts/07_forecast_operating_margin.png"): "c8b52a1db7e1fa3e58893e1827457da1c2b8439d0c62d890746593f73a93aac7",
-    Path("outputs/charts/08_forecast_fcff.png"): "bfb1f3ce92a21a2d7b0223d997186195f86893817b6237f477bba5e0f185983c",
-    Path("outputs/charts/09_forecast_reinvestment_drivers.png"): "539cd96c520e83fefecbb6587247ba0544bda8d4b05a5d594763aac1ddb95d3b",
-    Path("notebooks/02_scenario_forecast.ipynb"): "367e36d5bfdb9ceb18c1cca54457b44662f7c786d4464494fdf4902757a2c07d",
+    Path("outputs/charts/06_forecast_revenue.png"): "262fa83c0cc998f96cb518c15992961faeb3f551d501ee537fb53ca8331dcccd",
+    Path("outputs/charts/07_forecast_operating_margin.png"): "386779d8d302d7a4dc09ade649673fd25b8c816bfd6373d9dd6b9515ca41851e",
+    Path("outputs/charts/08_forecast_fcff.png"): "fc6c9a366e7ed4ddc013ae1fe359abac5ff64ffc40f079e8fc660e798136af5b",
+    Path("outputs/charts/09_forecast_reinvestment_drivers.png"): "fb0556aa47bec7ed95db296f4894a7edbf61db02dfc97592e3dfaa19d4ed5f90",
+    Path("notebooks/02_scenario_forecast.ipynb"): "7604b17b3de55a069a95ed99b224012b9f3a163845614488e50799190e284818",
 }
 
 
@@ -182,7 +182,7 @@ class ValuationModel:
 
 
 def verify_phase4_hashes(repository_root: Path) -> dict[str, str]:
-    """Protect approved Phase 4 content while allowing Git line normalization."""
+    """Protect approved Phase 4 text and visual content semantically."""
 
     verified: dict[str, str] = {}
     for relative, expected in PROTECTED_PHASE4_HASHES.items():
@@ -832,7 +832,9 @@ def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
         raise ValueError(f"Cannot write empty valuation output: {path.name}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 

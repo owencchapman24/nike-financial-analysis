@@ -339,7 +339,8 @@ The model does not subtract interest, debt repayment, dividends, or repurchases.
 
 The valuation layer consumes the protected full-precision Phase 4 FCFF output
 without changing the operating forecast. It calculates a bottom-up WACC, discounts
-FY2027-FY2031 FCFF at exact May 31 dates using 365-day XNPV-equivalent exponents,
+FY2027-FY2031 FCFF from the September 4, 2026 valuation date to exact May 31 cash-
+flow dates using 365-day XNPV-equivalent exponents,
 constructs an explicit FY2032 stable-state bridge, and applies the Gordon-growth
 formula. The enterprise-to-equity bridge uses documented cash, investments,
 carrying debt, preferred stock, and a diluted-share proxy. Operating leases remain
@@ -369,8 +370,9 @@ invalid seed, formula errors are absent, Python reconciliation passes, and no
 external link, connection, VBA part, private value, or machine path is present.
 
 The selected-scenario DCF uses explicit 365-day date exponents as the transparent
-primary calculation and native `XNPV` as a cross-check. Both include zero on the May
-31, 2026 model date and the FY2031 FCFF plus terminal value on May 31, 2031. The
+primary calculation and native `XNPV` as a cross-check. Both include zero on the
+September 4, 2026 valuation date and the FY2031 FCFF plus terminal value on May 31,
+2031. The
 center sensitivity cell uses the full-precision calculated WACC and 2.5% perpetual
 growth rate. Operating leases remain memorandum-only because lease expense remains
 operating.
@@ -380,3 +382,13 @@ removes the volatile absolute workbook path, fixes nonfinancial package timestam
 and records a semantic digest over sheets, names, tables, formulas, cached results,
 formats, chart references, calculation settings, and package-link counts. Binary
 identity is not required across Excel saves; semantic identity is.
+
+## v0.5.2 artifact portability
+
+Project-owned CSV writers emit LF explicitly. Protected text comparison permits only
+LF/CRLF-equivalent byte sequences. Standalone PNG fingerprints use decoded pixels,
+dimensions, and color mode rather than compressor-specific container bytes. Rendered
+notebook fingerprints preserve notebook structure, Markdown, code, text and table
+outputs while replacing embedded PNG containers with the same pixel fingerprint.
+Excel and other non-PNG binaries retain their existing strict or workbook-specific
+integrity controls.

@@ -3,10 +3,11 @@
 ## Scope
 
 Phase 5A applies a transparent discounted-cash-flow calculation to the approved
-FY2027-FY2031 Base, Bull, and Bear operating scenarios. The model date is May 31,
-2026, and the information cutoff is September 7, 2026. The September 4, 2026
-closing price is a separately dated reference comparison, not a price target or
-investment recommendation.
+FY2027-FY2031 Base, Bull, and Bear operating scenarios. The valuation and discount
+anchor is September 4, 2026, and the information cutoff is September 7, 2026. The
+September 4 closing price is a dated reference comparison, not a price target or
+investment recommendation. The equity bridge uses Nike's latest completed reporting-
+period balance sheet, dated May 31, 2026; no interim roll-forward is inferred.
 
 The Python model is the authoritative Phase 5A calculation engine. It creates
 auditable CSV exports. The separately documented Phase 5B workbook translates and
@@ -49,8 +50,8 @@ cross-check only and does not create another headline valuation.
 
 ## Cash-flow timing and present value
 
-The model date is May 31, 2026. FY2027-FY2031 FCFF is assigned to each May 31
-fiscal-year-end date. The discount exponent follows Excel XNPV's 365-day
+The valuation date is September 4, 2026. FY2027-FY2031 FCFF remains assigned to
+each May 31 fiscal-year-end date. The discount exponent follows Excel XNPV's 365-day
 convention:
 
 ```text
@@ -59,8 +60,9 @@ Discount factor = 1 / (1 + WACC) ^ discount exponent
 Present value = FCFF × discount factor
 ```
 
-The leap day produces an exponent of 731/365 for FY2028 rather than an assumed
-integer two. No September stub, mid-year convention, interest expense, debt
+The FY2027 exponent is 269/365 and the leap day produces an FY2028 exponent of
+635/365 rather than an assumed integer period. No interim balance-sheet roll-forward,
+mid-year convention, interest expense, debt
 repayment, dividend, or repurchase enters FCFF.
 
 ## FY2032 terminal transition

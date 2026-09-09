@@ -4,13 +4,17 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
+
+from nike_financial_analysis.artifact_integrity import (
+    hash_matches_expected,
+    raw_sha256,
+)
 
 from nike_financial_analysis.metrics import (
     VALID_INPUT_STATUSES,
@@ -176,24 +180,7 @@ def find_repository_root(start: Path | None = None) -> Path:
 
 
 def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def hash_matches_expected(path: Path, expected: str) -> bool:
-    """Match content hashes while treating LF and CRLF as equivalent for text."""
-
-    payload = path.read_bytes()
-    candidates = {hashlib.sha256(payload).hexdigest()}
-    if path.suffix.lower() in {".csv", ".ipynb"}:
-        lf_payload = payload.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-        crlf_payload = lf_payload.replace(b"\n", b"\r\n")
-        candidates.add(hashlib.sha256(lf_payload).hexdigest())
-        candidates.add(hashlib.sha256(crlf_payload).hexdigest())
-    return expected in candidates
+    return raw_sha256(path)
 
 
 def verify_phase2_hashes(repository_root: Path) -> dict[str, str]:
@@ -592,7 +579,9 @@ def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
         raise ValueError("Cannot write an empty analysis table.")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 

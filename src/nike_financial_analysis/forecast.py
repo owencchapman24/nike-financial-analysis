@@ -35,12 +35,12 @@ DEFAULT_CHARTS_DIR = Path("outputs/charts")
 PROTECTED_PHASE3_HASHES = {
     Path("outputs/tables/historical_summary.csv"): "109a874cda3da2ea3e58df05e243f5199f05c1efbc5755b6a154d152e0c21c27",
     Path("outputs/tables/historical_kpis.csv"): "cdc3d03dddf413c025c1ee0aa3bbe50f6159798deeff54bb1abcb9093b909060",
-    Path("outputs/charts/01_revenue_and_growth.png"): "be2f204f92af59220b71c48d77eda31b442d1f471cc9ef47cc175db81679dbbf",
-    Path("outputs/charts/02_margin_trends.png"): "d0dc582af284c9338920689b6d08b293f1d14d605f705697c7b6716dd9ad35d5",
-    Path("outputs/charts/03_cash_generation.png"): "a2276144ef3f3f9188166ca06b02ba73fe4b10e1c2bee60ca66e97d5100632cc",
-    Path("outputs/charts/04_working_capital_and_liquidity.png"): "eb49f61a87ff03d40bdc6ed3147978e0861b59fbafad658c1b96d0d8eabba8ec",
-    Path("outputs/charts/05_capital_structure.png"): "4353c2ee4b281aa708326ec84e28e3ffca8cb86ac5d482eb1fc3a360d4b4f2e3",
-    Path("notebooks/01_historical_analysis.ipynb"): "87ece80cc170079185bbdc050b5627135c128206dbae08d1c732e00e7a739a15",
+    Path("outputs/charts/01_revenue_and_growth.png"): "576efd4b3d6a1253eec281b4f66428da136bb8817e1b6e9e947ccaf80945b154",
+    Path("outputs/charts/02_margin_trends.png"): "21f763bec8750147bf84932a94e0d4b2f5da0f0df13dd8581e4da81cc34ebd7f",
+    Path("outputs/charts/03_cash_generation.png"): "dcb579117831cbf3fa13caa985bb21291cc84ee855384a13d84f7193f36155a2",
+    Path("outputs/charts/04_working_capital_and_liquidity.png"): "c268821b55950935199d67ba98be4bbd4c649d104eed4119d679b5dc80cac560",
+    Path("outputs/charts/05_capital_structure.png"): "eed9c1a92fcb2719bcd5729b0d1394c51e50eaba9482e8304027581e9ba68d08",
+    Path("notebooks/01_historical_analysis.ipynb"): "0d5aad20af4750f7c2ee819bbf5f8587084e15b299c2a617af6d009f12d8a957",
 }
 FORECAST_TABLE_FILENAMES = (
     "scenario_forecast_long.csv",
@@ -92,7 +92,7 @@ class ForecastModel:
 
 
 def verify_phase3_hashes(repository_root: Path) -> dict[str, str]:
-    """Protect Phase 3 content while allowing Git text-line normalization."""
+    """Protect Phase 3 text and visual content with artifact-specific rules."""
 
     verified: dict[str, str] = {}
     for relative, expected in PROTECTED_PHASE3_HASHES.items():

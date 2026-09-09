@@ -9,9 +9,9 @@ illustrative DCF; it does not recommend whether Nike's shares should be bought o
 sold.
 
 The historical period is FY2022-FY2026, the explicit forecast covers
-FY2027-FY2031, the DCF model date is May 31, 2026, and the information cutoff is
-September 7, 2026. The separately dated comparison price is $38.40 on September 4,
-2026.
+FY2027-FY2031, the DCF valuation date is September 4, 2026, and the information
+cutoff is September 7, 2026. The comparison price is $38.40 on the valuation date;
+the latest completed balance sheet remains May 31, 2026.
 
 ## Architecture
 
@@ -137,7 +137,7 @@ Carrying debt provides a WACC cross-check but does not replace the approved prim
 fair-value-debt weighting. Market observations, dates, source IDs, and proxy choices
 remain visible in the valuation input and source registers.
 
-Cash flows are discounted from May 31, 2026 to their exact May 31 fiscal-year-end
+Cash flows are discounted from September 4, 2026 to their exact May 31 fiscal-year-end
 dates using 365-day exponents. The FY2032 terminal bridge applies the common 2.5%
 perpetual-growth rate and holds the selected FY2031 operating ratios stable. The
 Gordon-growth terminal value is calculated from FY2032 FCFF.
@@ -149,7 +149,7 @@ million of redeemable preferred stock. Operating leases remain memorandum-only.
 Equity value is divided by 1,484.698703 million diluted-proxy shares; basic shares
 provide a denominator cross-check.
 
-The resulting illustrative values are $29.44 for Bear, $46.81 for Base, and $58.30
+The resulting illustrative values are $30.06 for Bear, $47.81 for Base, and $59.55
 for Bull. Terminal value represents 76.7%-79.1% of enterprise value across the
 cases, which makes WACC, perpetual growth, and the FY2031 operating state especially
 important. Full calculations and limitations appear in the

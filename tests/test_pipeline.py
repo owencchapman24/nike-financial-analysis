@@ -110,6 +110,8 @@ def test_csv_writes_are_deterministic(tmp_path):
     write_csv(output, rows)
 
     assert output.read_bytes() == first
+    assert b"\r\n" not in first
+    assert first.endswith(b"\n")
 
 
 def test_generated_output_privacy_scan(tmp_path):

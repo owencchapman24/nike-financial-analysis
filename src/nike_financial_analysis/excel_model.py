@@ -58,14 +58,14 @@ FIXED_CORE_TIMESTAMP = "2026-05-31T00:00:00Z"
 MODEL_AUTHOR = "Independent portfolio project"
 
 PROTECTED_PHASE5A_HASHES = {
-    Path("config/valuation_assumptions.csv"): "68c295620e86d07e9beccf7622d12dfe69fff49fa195083581e1fad1d1f0873b",
-    Path("config/valuation_sources.csv"): "940263106e8e1eb05beebe12911b61f30c7ff193dab16a3f7449ef1b86db2166",
+    Path("config/valuation_assumptions.csv"): "7de07f936ffaf79403f1794924e83c669bb22af972a0cd8073e89373eb44f60f",
+    Path("config/valuation_sources.csv"): "6d7687ce75218eb859fc7b57220d1edc7cb0e4200427e5454ab950547fc5949b",
     Path("outputs/model_exports/wacc_build.csv"): "fefe913bf1a728706a6d05e51ed21948c18b8f83eef9bd7afe3df3f129bc0076",
-    Path("outputs/model_exports/valuation_cash_flows.csv"): "8e5c423bf32f4e677ddbe292fb436a00fec3e36b9c76d499f3e1be62b6447c0a",
-    Path("outputs/model_exports/valuation_summary.csv"): "c9fbe0d146f401832cef909dae527a70cacdd30963ae6561d3714884d8cacfcd",
-    Path("outputs/model_exports/dcf_sensitivity.csv"): "ea0c49d4cc7b1a4cc7348da6a715c50e7d977768d6728c09ac6bf415dbf11738",
-    Path("outputs/model_exports/valuation_validation_summary.csv"): "d5884480560e644e80e808775b712602130845e5bc58880498372a9fb0681a91",
-    Path("outputs/charts/10_scenario_valuation.png"): "16a59791cb027955566c11adfdd4430467f7057e417b97c3315070083a4b7c1b",
+    Path("outputs/model_exports/valuation_cash_flows.csv"): "3f573acb52f3f494f9d51c9116ff03f9c719399f2274d0053f4291d6cf7065cd",
+    Path("outputs/model_exports/valuation_summary.csv"): "8c1850ed09e95012112626d7b5c45d028fe5030b109c9a3ba0e2e87ce1b83c59",
+    Path("outputs/model_exports/dcf_sensitivity.csv"): "624521449efe248a38445605be46403d5edfd4b8c27a627d25d59bff3d6f3e1c",
+    Path("outputs/model_exports/valuation_validation_summary.csv"): "2e36956d3c429604b785b4c2ceb5eec2f5b067e4e4f8e8c4e8b6dd3687f5acaa",
+    Path("outputs/charts/10_scenario_valuation.png"): "b3d9c953a5cb15c867c45510a739a6a4f802f4677064fa0833f39997a1b51429",
 }
 
 REQUIRED_DEFINED_NAMES = {
@@ -117,7 +117,7 @@ FORMULA_ERRORS = {
 
 
 def verify_phase5a_hashes(repository_root: Path) -> dict[str, str]:
-    """Verify Phase 5A content while allowing Git text-line normalization."""
+    """Verify Phase 5A text and visual content with artifact-specific rules."""
 
     verified: dict[str, str] = {}
     for relative, expected in PROTECTED_PHASE5A_HASHES.items():
@@ -344,7 +344,11 @@ def _write_sources(
         sheet.write(row - 1, 13, scenario, formats["body"])
     sheet.write("M12", "Workbook metadata", formats["subheader"])
     metadata = (
-        ("Model date", datetime(2026, 5, 31), formats["date"]),
+        (
+            "DCF valuation date",
+            datetime.combine(date.fromisoformat(model.model_date), datetime.min.time()),
+            formats["date"],
+        ),
         ("Information cutoff", datetime(2026, 9, 7), formats["date"]),
         ("Reference market date", datetime(2026, 9, 4), formats["date"]),
         ("Valuation inputs", "config/valuation_assumptions.csv", formats["source"]),
@@ -767,7 +771,8 @@ def _write_dcf(
     for col in range(2, 9):
         sheet.write_blank(8, col, None, formats["section"])
     sheet.write_row("B10", ["Metric", "Unit", "Model date", *[f"{year}E" for year in FORECAST_YEARS]], formats["header"])
-    date_values = [date(2026, 5, 31), *[date(year, 5, 31) for year in range(2027, 2032)]]
+    model_date = date.fromisoformat(model.model_date)
+    date_values = [model_date, *[date(year, 5, 31) for year in range(2027, 2032)]]
     sheet.write("B12", "Cash-flow date", formats["body"])
     sheet.write("C12", "date", formats["body"])
     for col, value in enumerate(date_values, start=3):
@@ -783,7 +788,7 @@ def _write_dcf(
     sheet.write("C14", "x", formats["body"])
     for col in range(3, 9):
         letter = xl_col_to_name(col)
-        expected = Decimal((date_values[col - 3] - date(2026, 5, 31)).days) / Decimal("365")
+        expected = Decimal((date_values[col - 3] - model_date).days) / Decimal("365")
         _write_formula(sheet, 13, col, f"=({letter}12-ModelDate)/365", formats["formula"], _number(expected))
     sheet.write("B15", "Discount factor", formats["body"])
     sheet.write("C15", "x", formats["body"])
@@ -1288,7 +1293,12 @@ def _write_cover(
     workbook.define_name("SelectedScenario", "='Cover'!$D$6")
 
     metadata = (
-        ("Model date", "=ModelDate", datetime(2026, 5, 31), formats["date"]),
+        (
+            "DCF valuation date",
+            "=ModelDate",
+            datetime.combine(date.fromisoformat(model.model_date), datetime.min.time()),
+            formats["date"],
+        ),
         ("Information cutoff", "=InformationCutoff", datetime(2026, 9, 7), formats["date"]),
         ("Reference market date", "=ReferenceMarketDate", datetime(2026, 9, 4), formats["date"]),
     )

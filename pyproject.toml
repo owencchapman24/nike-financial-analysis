@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nike-financial-analysis"
-version = "0.5.1"
+version = "0.5.2"
 description = "Reproducible Nike financial analysis using primary SEC filing data"
 readme = "README.md"
 requires-python = ">=3.13,<3.15"
@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib>=3.10,<4",
     "openpyxl>=3.1.5,<4",
     "pandas>=2.3,<4",
+    "pillow>=12,<13",
     "python-dotenv>=1.1,<2",
     "requests>=2.32,<3",
     "xlsxwriter>=3.2,<4",

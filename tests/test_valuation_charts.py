@@ -23,11 +23,11 @@ def test_scenario_valuation_chart_shows_three_values_and_dated_reference():
     assert [tick.get_text() for tick in axis.get_xticklabels()] == ["Bear", "Base", "Bull"]
     assert len(axis.patches) == 3
     assert [Decimal(str(patch.get_height())).quantize(Decimal("0.01")) for patch in axis.patches] == [
-        Decimal("29.44"),
-        Decimal("46.81"),
-        Decimal("58.30"),
+        Decimal("30.06"),
+        Decimal("47.81"),
+        Decimal("59.55"),
     ]
     figure_text = " ".join(text.get_text() for text in figure.texts)
     assert VALUATION_SOURCE_NOTE in figure_text
-    assert "May 31, 2026 model date" in figure_text
+    assert "September 4, 2026 valuation date" in figure_text
     assert "September 4, 2026 reference price" in axis.get_legend().get_texts()[0].get_text()

@@ -1,6 +1,6 @@
 assumption_id,category,input_name,value,unit,observation_date,source_ids,source_type,owner_status,notes
-VA01,model_timing,model_date,2026-05-31,date,2026-05-31,VS01;VS09,approved_methodology,approved,Primary financial-model date aligned with the FY2026 balance sheet.
-VA02,market,reference_market_date,2026-09-04,date,2026-09-04,VS04;VS05;VS09,reported_market_input,approved,Separately dated comparison; not the financial-model date.
+VA01,model_timing,model_date,2026-09-04,date,2026-09-04,VS04;VS09,approved_methodology,approved,DCF valuation and discount-anchor date aligned with the reference market date.
+VA02,market,reference_market_date,2026-09-04,date,2026-09-04,VS04;VS05;VS09,reported_market_input,approved,Reference market date and DCF valuation date; the latest reported balance sheet remains May 31 2026.
 VA03,market,reference_market_price,38.40,USD per share,2026-09-04,VS05,reported_market_input,approved,NKE Class B closing price.
 VA04,shares,class_a_shares_outstanding,281.387752,millions,2026-07-08,VS02,reported_filing_input,approved,Economically participates with Class B and converts one-for-one.
 VA05,shares,class_b_shares_outstanding,1202.110951,millions,2026-07-08,VS02,reported_filing_input,approved,NKE publicly traded share class.

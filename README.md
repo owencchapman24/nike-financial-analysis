@@ -10,15 +10,16 @@ Excel model.
 |---|---|
 | Historical analysis | FY2022-FY2026 |
 | Operating scenarios | FY2027-FY2031 |
-| DCF model date | May 31, 2026 |
+| DCF valuation date | September 4, 2026 |
+| Latest reported balance sheet | May 31, 2026 |
 | Information cutoff | September 7, 2026 |
 | Reference market price | $38.40 on September 4, 2026 |
 
 **Bottom line:** Revenue reached $51.4 billion in FY2024 before falling 9.7% to
 $46.4 billion in FY2026. Derived operating margin declined from 14.3% in FY2022 to
 8.2% in FY2026, and FY2026 free cash flow was 67.0% below its FY2024 peak. The
-project's three approved operating scenarios produce illustrative values of $29.44
-(Bear), $46.81 (Base), and $58.30 (Bull) per diluted-proxy share; all are highly
+project's three approved operating scenarios produce illustrative values of $30.06
+(Bear), $47.81 (Base), and $59.55 (Bull) per diluted-proxy share; all are highly
 dependent on terminal value.
 
 **Start here:** [Download the Excel valuation model](model/nike_valuation_model.xlsx)
@@ -77,9 +78,9 @@ fiscal-year-end discounting.
 
 | Scenario | Illustrative value/share | Comparison with $38.40 reference | Terminal value / EV |
 |---|---:|---:|---:|
-| Bear | $29.44 | 23.3% below | 76.7% |
-| Base | $46.81 | 21.9% above | 78.2% |
-| Bull | $58.30 | 51.8% above | 79.1% |
+| Bear | $30.06 | 21.7% below | 76.7% |
+| Base | $47.81 | 24.5% above | 78.2% |
+| Bull | $59.55 | 55.1% above | 79.1% |
 
 ![Illustrative Bear, Base, and Bull valuation outputs compared with the separately dated reference price](outputs/charts/10_scenario_valuation.png)
 
@@ -172,7 +173,9 @@ recalculated workbook are ready to inspect without rebuilding.
 ### Deterministic offline rebuild
 
 The following commands use committed inputs and require neither network access nor
-`.env`:
+`.env`. Generated CSVs use LF line endings. PNGs and rendered notebooks are checked
+by decoded pixels and substantive notebook content, so harmless image-container
+differences do not interrupt the cross-platform sequence.
 
 ```powershell
 uv run nike-historical-analysis
@@ -241,7 +244,8 @@ publishes the workbook only after blocking checks pass. See the
   and lease liabilities remain memorandum-only in the valuation.
 - The headline share denominator is a documented diluted-share proxy; basic shares
   provide a cross-check.
-- The model date, information cutoff, and reference-price date remain distinct.
+- The September 4 valuation date matches the reference-price and Treasury-rate
+  date. The equity bridge uses the latest completed balance sheet, dated May 31.
 
 ## Validation and quality controls
 
@@ -253,12 +257,12 @@ analysis:
 - Status propagation that prevents unresolved facts from entering calculations
 - Exact Decimal formula tests and repeatable table, chart, notebook, and valuation
   generation
-- Protected-text checks that allow Git-equivalent LF/CRLF checkouts but reject
-  substantive changes
+- Protected text permits only Git-equivalent LF/CRLF changes; PNG and notebook
+  fingerprints compare decoded pixels while still rejecting visual or content changes
 - Explicit-PV versus native `XNPV` reconciliation and Excel-to-Python comparison
 - Privacy, path, package-link, formula-cache, and protected-artifact checks
 
-The locked environment passes 105 automated tests. The historical dataset also
+The locked environment passes 112 automated tests. The historical dataset also
 passes 17 data-quality checks with no warnings or failures; workbook results are
 covered by the checks described in the Excel section above.
 

@@ -1,9 +1,20 @@
 import csv
+import base64
 import hashlib
+import io
+import json
 import re
 import struct
 from pathlib import Path
 
+import pytest
+from PIL import Image, PngImagePlugin
+
+from nike_financial_analysis.artifact_integrity import (
+    ArtifactIntegrityError,
+    semantic_notebook_sha256,
+    semantic_png_sha256,
+)
 from nike_financial_analysis.analysis import (
     EXPECTED_FISCAL_YEARS,
     PROTECTED_PHASE2_HASHES,
@@ -54,7 +65,146 @@ def test_protected_text_hashes_allow_only_line_ending_normalization(tmp_path):
     path.write_bytes(crlf_payload.replace(b"\r\n", b"\n"))
     assert hash_matches_expected(path, expected)
 
+    path.write_bytes(crlf_payload.replace(b"\r\n", b"\r"))
+    assert not hash_matches_expected(path, expected)
+
     path.write_bytes(b"metric,value\nrevenue,46399\n")
+    assert not hash_matches_expected(path, expected)
+
+
+def _png_bytes(
+    *,
+    pixels=((10, 20, 30, 255), (40, 50, 60, 255)),
+    size=(2, 1),
+    mode="RGBA",
+    compress_level=6,
+    metadata=None,
+):
+    image = Image.new(mode, size)
+    image.putdata(pixels)
+    output = io.BytesIO()
+    pnginfo = PngImagePlugin.PngInfo()
+    pnginfo.add_text("Software", "nike-financial-analysis")
+    if metadata:
+        for key, value in metadata.items():
+            pnginfo.add_text(key, value)
+    image.save(output, format="PNG", compress_level=compress_level, pnginfo=pnginfo)
+    return output.getvalue()
+
+
+def test_semantic_png_accepts_recompression_and_rejects_visual_changes(tmp_path):
+    low = tmp_path / "low.png"
+    high = tmp_path / "high.png"
+    low.write_bytes(_png_bytes(compress_level=0))
+    high.write_bytes(_png_bytes(compress_level=9))
+
+    expected = semantic_png_sha256(low)
+    assert low.read_bytes() != high.read_bytes()
+    assert semantic_png_sha256(high) == expected
+    assert hash_matches_expected(high, expected)
+
+    pixel = tmp_path / "pixel.png"
+    pixel.write_bytes(
+        _png_bytes(pixels=((11, 20, 30, 255), (40, 50, 60, 255)))
+    )
+    dimension = tmp_path / "dimension.png"
+    dimension.write_bytes(
+        _png_bytes(
+            pixels=((10, 20, 30, 255), (40, 50, 60, 255), (70, 80, 90, 255)),
+            size=(3, 1),
+        )
+    )
+    color_mode = tmp_path / "mode.png"
+    color_mode.write_bytes(
+        _png_bytes(pixels=((10, 20, 30), (40, 50, 60)), mode="RGB")
+    )
+    assert semantic_png_sha256(pixel) != expected
+    assert semantic_png_sha256(dimension) != expected
+    assert semantic_png_sha256(color_mode) != expected
+
+
+@pytest.mark.parametrize("payload", [b"not png", b"\x89PNG\r\n\x1a\ntruncated"])
+def test_semantic_png_rejects_invalid_content(tmp_path, payload):
+    path = tmp_path / "invalid.png"
+    path.write_bytes(payload)
+    with pytest.raises(ArtifactIntegrityError, match="valid PNG|Expected PNG"):
+        semantic_png_sha256(path)
+    assert not hash_matches_expected(path, "0" * 64)
+
+
+def test_png_metadata_allowlist_rejects_free_form_content(tmp_path):
+    path = tmp_path / "metadata.png"
+    path.write_bytes(_png_bytes(metadata={"Comment": "temporary path"}))
+    with pytest.raises(ArtifactIntegrityError, match="unexpected metadata"):
+        semantic_png_sha256(path)
+
+
+def _notebook(path: Path, png: bytes, *, image_as_list=False) -> None:
+    encoded = base64.b64encode(png).decode("ascii")
+    payload = {
+        "cells": [
+            {"cell_type": "markdown", "metadata": {}, "source": ["# Finding\n"]},
+            {
+                "cell_type": "code",
+                "execution_count": 1,
+                "metadata": {},
+                "source": ["print('table')\n"],
+                "outputs": [
+                    {"name": "stdout", "output_type": "stream", "text": ["table\n"]},
+                    {
+                        "data": {"image/png": [encoded] if image_as_list else encoded},
+                        "metadata": {},
+                        "output_type": "display_data",
+                    },
+                ],
+            },
+        ],
+        "metadata": {"kernelspec": {"name": "python3"}},
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    path.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+
+
+def test_notebook_fingerprint_normalizes_only_embedded_png_containers(tmp_path):
+    first = tmp_path / "first.ipynb"
+    second = tmp_path / "second.ipynb"
+    _notebook(first, _png_bytes(compress_level=0))
+    _notebook(second, _png_bytes(compress_level=9), image_as_list=True)
+    expected = semantic_notebook_sha256(first)
+    assert semantic_notebook_sha256(second) == expected
+    assert hash_matches_expected(second, expected)
+
+    payload = json.loads(second.read_text(encoding="utf-8"))
+    for field, value in (
+        ((0, "source"), ["# Changed finding\n"]),
+        ((1, "source"), ["print('changed')\n"]),
+        ((1, "text"), ["changed table\n"]),
+    ):
+        changed = json.loads(json.dumps(payload))
+        cell, target = field
+        if target == "text":
+            changed["cells"][cell]["outputs"][0][target] = value
+        else:
+            changed["cells"][cell][target] = value
+        candidate = tmp_path / f"changed-{target}-{cell}.ipynb"
+        candidate.write_text(json.dumps(changed), encoding="utf-8")
+        assert semantic_notebook_sha256(candidate) != expected
+
+    changed_pixel = tmp_path / "changed-pixel.ipynb"
+    _notebook(
+        changed_pixel,
+        _png_bytes(pixels=((11, 20, 30, 255), (40, 50, 60, 255))),
+    )
+    assert semantic_notebook_sha256(changed_pixel) != expected
+
+
+def test_non_png_binary_protection_remains_byte_exact(tmp_path):
+    path = tmp_path / "model.xlsx"
+    path.write_bytes(b"binary-one")
+    expected = hashlib.sha256(path.read_bytes()).hexdigest()
+    assert hash_matches_expected(path, expected)
+    path.write_bytes(b"binary-two")
     assert not hash_matches_expected(path, expected)
 
 
@@ -77,6 +227,9 @@ def test_artifact_build_is_complete_and_deterministic(tmp_path):
     ):
         assert first_path.stat().st_size > 0
         assert sha256(first_path) == sha256(second_path)
+
+    for path in first["table_paths"]:
+        assert b"\r\n" not in path.read_bytes()
 
     with first["table_paths"][0].open(encoding="utf-8", newline="") as handle:
         summary = list(csv.DictReader(handle))

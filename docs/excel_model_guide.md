@@ -9,8 +9,10 @@ remains the authoritative calculation engine; Excel provides a transparent model
 reviewer can navigate and audit. This independent portfolio analysis is not an
 investment recommendation or price target.
 
-The model date is May 31, 2026. The information cutoff is September 7, 2026. The
-USD 38.40 reference price is separately observed on September 4, 2026.
+The DCF valuation and discount-anchor date is September 4, 2026. The information
+cutoff is September 7, 2026, and the USD 38.40 reference price is observed on the
+valuation date. The equity bridge uses the latest completed balance sheet, dated
+May 31, 2026, without an unsupported interim roll-forward.
 
 ## Worksheet map
 
@@ -43,8 +45,8 @@ NOPAT plus D&A less capital expenditures and the change in operating NWC. Capex 
 positive investment amount. No tax benefit is created from negative derived
 operating income without an NOL schedule.
 
-The DCF discounts May 31 cash flows from the May 31, 2026 model date using exact
-365-day exponents. The primary visible PV schedule reconciles with native `XNPV`.
+The DCF discounts May 31 cash flows from September 4, 2026 using exact 365-day
+exponents. The primary visible PV schedule reconciles with native `XNPV`.
 FY2032 holds selected FY2031 operating ratios stable and applies the common 2.5%
 perpetual-growth rate. The equity bridge adds cash and short-term investments and
 subtracts carrying interest-bearing debt and redeemable preferred stock. Operating

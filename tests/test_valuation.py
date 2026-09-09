@@ -31,9 +31,9 @@ def test_formula_derived_wacc_and_approved_headline_values():
         for result in model.scenario_valuations
     }
     assert values == {
-        "base": Decimal("46.80882518865362117049832916"),
-        "bull": Decimal("58.30079559485476839074833016"),
-        "bear": Decimal("29.43573449982434105463758519"),
+        "base": Decimal("47.80676026082300158921320762"),
+        "bull": Decimal("59.54761692014691443357771265"),
+        "bear": Decimal("30.05741351721207083337826683"),
     }
 
 
@@ -41,20 +41,20 @@ def test_date_based_discounting_uses_xnpv_365_day_exponent():
     exponent, factor, present_value = _discount(
         Decimal("100"),
         cash_flow_date=date(2027, 5, 31),
-        model_date=date(2026, 5, 31),
+        model_date=date(2026, 9, 4),
         wacc=Decimal("0.10"),
     )
-    assert exponent == Decimal("1")
-    assert factor == Decimal("1") / Decimal("1.10")
-    assert present_value == Decimal("100") / Decimal("1.10")
+    assert exponent == Decimal("269") / Decimal("365")
+    assert factor == Decimal("1") / Decimal("1.10") ** exponent
+    assert present_value == Decimal("100") * factor
 
     leap_exponent, _, _ = _discount(
         Decimal("100"),
         cash_flow_date=date(2028, 5, 31),
-        model_date=date(2026, 5, 31),
+        model_date=date(2026, 9, 4),
         wacc=Decimal("0.10"),
     )
-    assert leap_exponent == Decimal("731") / Decimal("365")
+    assert leap_exponent == Decimal("635") / Decimal("365")
 
 
 def test_terminal_bridge_and_equity_bridge_hold_exactly():
@@ -105,7 +105,7 @@ def test_wacc_must_exceed_terminal_growth():
         calculate_scenario_valuation(
             "base",
             forecast,
-            model_date=date(2026, 5, 31),
+            model_date=date(2026, 9, 4),
             wacc=Decimal("0.025"),
             terminal_growth=Decimal("0.025"),
             cash_and_investments=Decimal("9027"),

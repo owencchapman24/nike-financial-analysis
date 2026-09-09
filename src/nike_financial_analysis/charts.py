@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
@@ -734,11 +735,19 @@ def scenario_valuation_chart(summary_rows: list[dict[str, str]]) -> Figure:
     reference_prices = {Decimal(row["reference_market_price"]) for row in summary_rows}
     waccs = {Decimal(row["wacc"]) for row in summary_rows}
     growth_rates = {Decimal(row["terminal_growth"]) for row in summary_rows}
-    if len(reference_prices) != 1 or len(waccs) != 1 or len(growth_rates) != 1:
+    model_dates = {row["model_date"] for row in summary_rows}
+    if (
+        len(reference_prices) != 1
+        or len(waccs) != 1
+        or len(growth_rates) != 1
+        or len(model_dates) != 1
+    ):
         raise ValueError("Valuation rows must use common market and headline assumptions.")
     reference_price = float(reference_prices.pop())
     displayed_wacc = waccs.pop()
     terminal_growth = growth_rates.pop()
+    model_date = date.fromisoformat(model_dates.pop())
+    model_date_label = f"{model_date.strftime('%B')} {model_date.day}, {model_date.year}"
 
     fig, axis = plt.subplots(figsize=(12, 7), dpi=150)
     fig.subplots_adjust(left=0.10, right=0.97, top=0.82, bottom=0.18)
@@ -753,7 +762,7 @@ def scenario_valuation_chart(summary_rows: list[dict[str, str]]) -> Figure:
         0.5,
         0.88,
         (
-            "May 31, 2026 model date | "
+            f"{model_date_label} valuation date | "
             f"{displayed_wacc:.1%} displayed WACC | "
             f"{terminal_growth:.1%} perpetual growth"
         ),

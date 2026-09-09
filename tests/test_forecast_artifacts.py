@@ -59,6 +59,7 @@ def test_forecast_build_is_complete_and_deterministic(tmp_path):
 
     with first["table_paths"][0].open(encoding="utf-8", newline="") as handle:
         long_rows = list(csv.DictReader(handle))
+    assert all(b"\r\n" not in path.read_bytes() for path in first["table_paths"])
     assert {row["scenario"] for row in long_rows} == {"actual", "base", "bull", "bear"}
     assert {row["period_class"] for row in long_rows} == {"actual", "forecast"}
 

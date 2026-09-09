@@ -640,12 +640,13 @@ wheels = [
 
 [[package]]
 name = "nike-financial-analysis"
-version = "0.5.1"
+version = "0.5.2"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },
     { name = "openpyxl" },
     { name = "pandas" },
+    { name = "pillow" },
     { name = "python-dotenv" },
     { name = "requests" },
     { name = "xlsxwriter" },
@@ -664,6 +665,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10,<4" },
     { name = "openpyxl", specifier = ">=3.1.5,<4" },
     { name = "pandas", specifier = ">=2.3,<4" },
+    { name = "pillow", specifier = ">=12,<13" },
     { name = "python-dotenv", specifier = ">=1.1,<2" },
     { name = "requests", specifier = ">=2.32,<3" },
     { name = "xlsxwriter", specifier = ">=3.2,<4" },

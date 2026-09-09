@@ -15,59 +15,59 @@ wacc_exceeds_terminal_growth,terminal_value,base,pass,0.084874438275402902610787
 terminal_fcff_identity,terminal_value,base,pass,4815.274125249059472000000000,NOPAT + D&A - capex - change in operating NWC,,exact,FY2032 terminal FCFF identity holds exactly.
 terminal_revenue_bridge,terminal_value,base,pass,52706.027853919440000000,FY2031 revenue * (1 + terminal growth),,exact,FY2032 revenue applies the common terminal-growth rate exactly.
 terminal_value_formula,terminal_value,base,pass,80422.86932363971122337006336,FY2032 FCFF / (WACC - terminal growth),,exact,The Gordon-growth terminal-value formula holds exactly.
-enterprise_value_equation,dcf,base,pass,68412.30204654776166809221117,68412.30204654776166809221117,0E-23,exact,Enterprise value equals explicit-period PV plus terminal-value PV.
-equity_bridge_equation,equity_bridge,base,pass,69497.00204654776166809221117,69497.00204654776166809221117,0E-23,exact,The bridge adds all cash and investments and subtracts carrying debt and preferred stock only.
+enterprise_value_equation,dcf,base,pass,69893.93495387585217207178815,69893.93495387585217207178815,0E-23,exact,Enterprise value equals explicit-period PV plus terminal-value PV.
+equity_bridge_equation,equity_bridge,base,pass,70978.63495387585217207178815,70978.63495387585217207178815,0E-23,exact,The bridge adds all cash and investments and subtracts carrying debt and preferred stock only.
 positive_share_count,equity_bridge,base,pass,1484.698703,> 0,,exact,The headline diluted-proxy denominator is positive.
-share_denominator_cross_check,equity_bridge,base,pass,46.84668878106040492311250182,equity value / basic shares; diluted proxy exceeds basic shares,,exact,Basic shares are retained only as a denominator cross-check.
-discount_exponent,discounting,base:FY2027,pass,1,1,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,base:FY2027,pass,2882.870769608868802748879153,2882.870769608868802748879153,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,base:FY2028,pass,2.002739726027397260273972603,2.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,base:FY2028,pass,2740.241236876350326749833356,2740.241236876350326749833356,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,base:FY2029,pass,3.002739726027397260273972603,3.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,base:FY2029,pass,2966.611250433799195930588575,2966.611250433799195930588575,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,base:FY2030,pass,4.002739726027397260273972603,4.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,base:FY2030,pass,3143.097788045698674943819025,3143.097788045698674943819025,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,base:FY2031,pass,5.002739726027397260273972603,5.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,base:FY2031,pass,3175.604229722161305335099957,3175.604229722161305335099957,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-terminal_value_dependence,terminal_value,base,warning,0.7820797600913476217217951182,observation thresholds: warning >75%; strong warning >80%,,not a failure threshold,Terminal-value dependence is disclosed rather than hidden or treated as an automatic failure.
+share_denominator_cross_check,equity_bridge,base,pass,47.84543108149643739329362134,equity value / basic shares; diluted proxy exceeds basic shares,,exact,Basic shares are retained only as a denominator cross-check.
+discount_exponent,discounting,base:FY2027,pass,0.7369863013698630136986301370,0.7369863013698630136986301370,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,base:FY2027,pass,2945.306268372242170083330590,2945.306268372242170083330590,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,base:FY2028,pass,1.739726027397260273972602740,1.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,base:FY2028,pass,2799.587750136655210329575943,2799.587750136655210329575943,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,base:FY2029,pass,2.739726027397260273972602740,2.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,base:FY2029,pass,3030.860350674597993909775715,3030.860350674597993909775715,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,base:FY2030,pass,3.739726027397260273972602740,3.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,base:FY2030,pass,3211.169128643915504065381681,3211.169128643915504065381681,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,base:FY2031,pass,4.739726027397260273972602740,4.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,base:FY2031,pass,3244.379575480959026339936576,3244.379575480959026339936576,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+terminal_value_dependence,terminal_value,base,warning,0.7820797600913476217217951181,observation thresholds: warning >75%; strong warning >80%,,not a failure threshold,Terminal-value dependence is disclosed rather than hidden or treated as an automatic failure.
 wacc_exceeds_terminal_growth,terminal_value,bull,pass,0.08487443827540290261078735104164066393683,> 0.025,,exact,WACC exceeds terminal growth.
 terminal_fcff_identity,terminal_value,bull,pass,6085.161208982705850000000000,NOPAT + D&A - capex - change in operating NWC,,exact,FY2032 terminal FCFF identity holds exactly.
 terminal_revenue_bridge,terminal_value,bull,pass,56720.686029257250000000,FY2031 revenue * (1 + terminal growth),,exact,FY2032 revenue applies the common terminal-growth rate exactly.
 terminal_value_formula,terminal_value,bull,pass,101632.0383832738017682177364,FY2032 FCFF / (WACC - terminal growth),,exact,The Gordon-growth terminal-value formula holds exactly.
-enterprise_value_equation,dcf,bull,pass,85474.41560354898810310944299,85474.41560354898810310944299,0E-23,exact,Enterprise value equals explicit-period PV plus terminal-value PV.
-equity_bridge_equation,equity_bridge,bull,pass,86559.11560354898810310944299,86559.11560354898810310944299,0E-23,exact,The bridge adds all cash and investments and subtracts carrying debt and preferred stock only.
+enterprise_value_equation,dcf,bull,pass,87325.56960808297842898480962,87325.56960808297842898480962,0E-23,exact,Enterprise value equals explicit-period PV plus terminal-value PV.
+equity_bridge_equation,equity_bridge,bull,pass,88410.26960808297842898480962,88410.26960808297842898480962,0E-23,exact,The bridge adds all cash and investments and subtracts carrying debt and preferred stock only.
 positive_share_count,equity_bridge,bull,pass,1484.698703,> 0,,exact,The headline diluted-proxy denominator is positive.
-share_denominator_cross_check,equity_bridge,bull,pass,58.34795502584877426961218111,equity value / basic shares; diluted proxy exceeds basic shares,,exact,Basic shares are retained only as a denominator cross-check.
-discount_exponent,discounting,bull:FY2027,pass,1,1,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bull:FY2027,pass,3175.502823788956584374577884,3175.502823788956584374577884,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bull:FY2028,pass,2.002739726027397260273972603,2.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bull:FY2028,pass,3165.664707066538721251366692,3165.664707066538721251366692,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bull:FY2029,pass,3.002739726027397260273972603,3.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bull:FY2029,pass,3622.147660652276697857922730,3622.147660652276697857922730,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bull:FY2030,pass,4.002739726027397260273972603,4.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bull:FY2030,pass,3909.368178982517731341065448,3909.368178982517731341065448,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bull:FY2031,pass,5.002739726027397260273972603,5.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bull:FY2031,pass,3987.779840373517474658196346,3987.779840373517474658196346,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+share_denominator_cross_check,equity_bridge,bull,pass,59.59578490314526309969063021,equity value / basic shares; diluted proxy exceeds basic shares,,exact,Basic shares are retained only as a denominator cross-check.
+discount_exponent,discounting,bull:FY2027,pass,0.7369863013698630136986301370,0.7369863013698630136986301370,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bull:FY2027,pass,3244.275973358426657828990131,3244.275973358426657828990131,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bull:FY2028,pass,1.739726027397260273972602740,1.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bull:FY2028,pass,3234.224788561320250512046679,3234.224788561320250512046679,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bull:FY2029,pass,2.739726027397260273972602740,2.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bull:FY2029,pass,3700.593978181138305225184124,3700.593978181138305225184124,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bull:FY2030,pass,3.739726027397260273972602740,3.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bull:FY2030,pass,3994.034947495887476779278220,3994.034947495887476779278220,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bull:FY2031,pass,4.739726027397260273972602740,4.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bull:FY2031,pass,4074.144801965613406625491462,4074.144801965613406625491462,,exact,Each explicit FCFF is discounted at the full-precision WACC.
 terminal_value_dependence,terminal_value,bull,warning,0.7910431667213151218770818584,observation thresholds: warning >75%; strong warning >80%,,not a failure threshold,Terminal-value dependence is disclosed rather than hidden or treated as an automatic failure.
 wacc_exceeds_terminal_growth,terminal_value,bear,pass,0.08487443827540290261078735104164066393683,> 0.025,,exact,WACC exceeds terminal growth.
 terminal_fcff_identity,terminal_value,bear,pass,2943.531318172709721600000000,NOPAT + D&A - capex - change in operating NWC,,exact,FY2032 terminal FCFF identity holds exactly.
 terminal_revenue_bridge,terminal_value,bear,pass,47495.369520846720000000,FY2031 revenue * (1 + terminal growth),,exact,FY2032 revenue applies the common terminal-growth rate exactly.
 terminal_value_formula,terminal_value,bear,pass,49161.73584181992611568250509,FY2032 FCFF / (WACC - terminal growth),,exact,The Gordon-growth terminal-value formula holds exactly.
-enterprise_value_equation,dcf,bear,pass,42618.49683374155289165007486,42618.49683374155289165007486,0E-23,exact,Enterprise value equals explicit-period PV plus terminal-value PV.
-equity_bridge_equation,equity_bridge,bear,pass,43703.19683374155289165007486,43703.19683374155289165007486,0E-23,exact,The bridge adds all cash and investments and subtracts carrying debt and preferred stock only.
+enterprise_value_equation,dcf,bear,pass,43541.50286453942974226084187,43541.50286453942974226084187,0E-23,exact,Enterprise value equals explicit-period PV plus terminal-value PV.
+equity_bridge_equation,equity_bridge,bear,pass,44626.20286453942974226084187,44626.20286453942974226084187,0E-23,exact,The bridge adds all cash and investments and subtracts carrying debt and preferred stock only.
 positive_share_count,equity_bridge,bear,pass,1484.698703,> 0,,exact,The headline diluted-proxy denominator is positive.
-share_denominator_cross_check,equity_bridge,bear,pass,29.45954502377583331911418251,equity value / basic shares; diluted proxy exceeds basic shares,,exact,Basic shares are retained only as a denominator cross-check.
-discount_exponent,discounting,bear:FY2027,pass,1,1,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bear:FY2027,pass,2341.743322884963293519918750,2341.743322884963293519918750,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bear:FY2028,pass,2.002739726027397260273972603,2.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bear:FY2028,pass,1835.532166629561061211683931,1835.532166629561061211683931,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bear:FY2029,pass,3.002739726027397260273972603,3.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bear:FY2029,pass,1847.291684117548004163444394,1847.291684117548004163444394,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bear:FY2030,pass,4.002739726027397260273972603,4.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bear:FY2030,pass,1899.603507742793860135828166,1899.603507742793860135828166,,exact,Each explicit FCFF is discounted at the full-precision WACC.
-discount_exponent,discounting,bear:FY2031,pass,5.002739726027397260273972603,5.002739726027397260273972603,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
-discounted_fcff,discounting,bear:FY2031,pass,1987.914673979659349581924280,1987.914673979659349581924280,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+share_denominator_cross_check,equity_bridge,bear,pass,30.08172691644033728707671264,equity value / basic shares; diluted proxy exceeds basic shares,,exact,Basic shares are retained only as a denominator cross-check.
+discount_exponent,discounting,bear:FY2027,pass,0.7369863013698630136986301370,0.7369863013698630136986301370,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bear:FY2027,pass,2392.459405576369751503213977,2392.459405576369751503213977,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bear:FY2028,pass,1.739726027397260273972602740,1.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bear:FY2028,pass,1875.285029479976163970421838,1875.285029479976163970421838,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bear:FY2029,pass,2.739726027397260273972602740,2.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bear:FY2029,pass,1887.299227596494607070861495,1887.299227596494607070861495,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bear:FY2030,pass,3.739726027397260273972602740,3.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bear:FY2030,pass,1940.743989553106239410751565,1940.743989553106239410751565,,exact,Each explicit FCFF is discounted at the full-precision WACC.
+discount_exponent,discounting,bear:FY2031,pass,4.739726027397260273972602740,4.739726027397260273972602740,,exact,The cash-flow date uses a 365-day XNPV-equivalent exponent.
+discounted_fcff,discounting,bear:FY2031,pass,2030.967746450815658746593129,2030.967746450815658746593129,,exact,Each explicit FCFF is discounted at the full-precision WACC.
 terminal_value_dependence,terminal_value,bear,warning,0.7674229245103967656927059952,observation thresholds: warning >75%; strong warning >80%,,not a failure threshold,Terminal-value dependence is disclosed rather than hidden or treated as an automatic failure.
-sensitivity_center,sensitivity,base,pass,46.80882518865362117049832916,46.80882518865362117049832916,0E-26,exact,The full-precision center cell equals the Base headline DCF.
+sensitivity_center,sensitivity,base,pass,47.80676026082300158921320762,47.80676026082300158921320762,0E-26,exact,The full-precision center cell equals the Base headline DCF.
 sensitivity_growth_monotonicity,sensitivity,base,pass,increasing,increasing with terminal growth,,exact,Value increases as terminal growth rises at constant WACC.
 sensitivity_wacc_monotonicity,sensitivity,base,pass,decreasing,decreasing with WACC,,exact,Value decreases as WACC rises at constant terminal growth.

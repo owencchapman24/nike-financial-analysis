@@ -260,6 +260,7 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
 
 - **Status:** Accepted by project owner
 - **Decision:** Use a May 31, 2026 model date and exact May 31 fiscal-year-end cash-flow dates.
+  D032 later supersedes only the model-date choice; forecast cash-flow dates remain.
 - **WACC and terminal value:** Use a formula-derived bottom-up WACC with fair-value
   debt, a common 2.5% perpetual-growth rate, and an explicit FY2032 stable-state bridge.
 - **Equity bridge:** Add USD 9,027 million of cash and investments; subtract USD 7,942
@@ -304,3 +305,25 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
   same content.
 - **Control:** Binary artifacts remain byte-exact, and a regression test confirms
   that an actual value change still fails verification.
+
+## D032 â€” Align the DCF discount anchor with the market reference date
+
+- **Status:** Accepted for v0.5.2
+- **Decision:** Use September 4, 2026 as the DCF valuation and discount-anchor date.
+  Keep May 31, 2026 as the latest completed financial-statement and balance-sheet
+  date, and do not infer an interim balance-sheet roll-forward.
+- **Reason:** This aligns exact-date discounting with the Treasury-rate and reference-
+  price date while retaining the latest reported balance-sheet inputs.
+- **Unchanged:** WACC inputs, operating scenarios, FCFF, terminal growth, bridge
+  conventions, and share-denominator methodology.
+
+## D033 â€” Protect visual content rather than PNG containers
+
+- **Status:** Accepted for v0.5.2
+- **Decision:** Fingerprint PNG width, height, color mode, and decoded pixels. Apply
+  the same rule to embedded notebook PNGs while preserving all substantive notebook
+  content. Require project CSV writers to emit LF.
+- **Reason:** PNG compression and harmless container metadata may vary across
+  supported platforms even when the rendered image is identical.
+- **Control:** Any pixel, dimension, mode, notebook-content, or protected-text value
+  change still fails. Excel and other non-PNG binary controls are unchanged.

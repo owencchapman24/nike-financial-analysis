@@ -55,6 +55,9 @@ def test_pre_excel_recalculation_sentinel_is_deliberately_invalid(tmp_path):
     cached = openpyxl.load_workbook(path, data_only=True)
     try:
         assert cached["Checks"]["D9"].value == -999
+        assert cached["Cover"]["D8"].value.date().isoformat() == "2026-09-04"
+        assert cached["Sources"]["N13"].value.date().isoformat() == "2026-09-04"
+        assert cached["DCF"]["D12"].value.date().isoformat() == "2026-09-04"
     finally:
         cached.close()
 

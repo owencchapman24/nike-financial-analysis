@@ -64,6 +64,7 @@ def test_valuation_artifacts_are_complete_and_deterministic(tmp_path):
         "valuation_validation_summary.csv": len(first["model"].checks),
     }
     for path in first["table_paths"]:
+        assert b"\r\n" not in path.read_bytes()
         with path.open(encoding="utf-8", newline="") as handle:
             assert len(list(csv.DictReader(handle))) == expected_rows[path.name]
 

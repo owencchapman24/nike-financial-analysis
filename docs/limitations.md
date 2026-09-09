@@ -123,8 +123,9 @@
 
 - The DCF is conditional on three project analyst operating scenarios. It is not a
   prediction, price target, or investment recommendation.
-- The May 31, 2026 model date and September 4, 2026 reference price are separate.
-  No stub-period update is inferred between those dates.
+- The September 4, 2026 valuation date uses the latest completed balance-sheet
+  inputs from May 31, 2026. No unsupported interim balance-sheet roll-forward is
+  inferred.
 - WACC depends on market observations and proxy choices, including product-level
   sector betas, fair-value debt, an implied equity-risk premium, and a ratings-based
   spread. The carrying-debt build is only a cross-check.
@@ -148,7 +149,7 @@
   observed differences are expected to be materially smaller than those limits.
 - Terminal value exceeds 75% of enterprise value in all three scenarios. The model
   displays those observations as warnings rather than suppressing the valuation.
-- The May 31, 2026 model date and September 4, 2026 reference price remain separate.
-  The workbook does not infer a stub-period update.
+- The September 4, 2026 valuation date uses May 31, 2026 balance-sheet inputs. The
+  workbook does not infer an interim balance-sheet roll-forward.
 - Operating leases are memorandum-only and external workbook links, macros, live
   data connections, and scenario probabilities are intentionally absent.
