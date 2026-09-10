@@ -306,7 +306,7 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
 - **Control:** Binary artifacts remain byte-exact, and a regression test confirms
   that an actual value change still fails verification.
 
-## D032 â€” Align the DCF discount anchor with the market reference date
+## D032 - Align the DCF discount anchor with the market reference date
 
 - **Status:** Accepted for v0.5.2
 - **Decision:** Use September 4, 2026 as the DCF valuation and discount-anchor date.
@@ -317,7 +317,7 @@ work. Analytical conclusions and forecast assumptions require explicit owner rev
 - **Unchanged:** WACC inputs, operating scenarios, FCFF, terminal growth, bridge
   conventions, and share-denominator methodology.
 
-## D033 â€” Protect visual content rather than PNG containers
+## D033 - Protect visual content rather than PNG containers
 
 - **Status:** Accepted for v0.5.2
 - **Decision:** Fingerprint PNG width, height, color mode, and decoded pixels. Apply
