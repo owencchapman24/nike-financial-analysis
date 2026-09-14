@@ -34,6 +34,31 @@ def test_formula_workbook_has_approved_structure_and_native_logic(tmp_path):
         assert workbook["WACC"]["E36"].data_type == "f"
         assert workbook["DCF"]["E59"].data_type == "f"
         assert workbook["Sensitivity"]["F11"].data_type == "f"
+        checks = workbook["Checks"]
+        check_rows = {
+            checks[f"A{row}"].value: row
+            for row in range(9, checks.max_row + 1)
+        }
+        scenario_expected_rows = {
+            "terminal_bridge_revenue": 10,
+            "terminal_bridge_fcff": 20,
+            "terminal_value_formula": 22,
+            "enterprise_value_equation": 24,
+            "equity_value_equation": 25,
+            "basic_share_crosscheck": 27,
+        }
+        for check_id, dcf_row in scenario_expected_rows.items():
+            row = check_rows[check_id]
+            assert checks[f"C{row}"].value == "selected scenario"
+            assert checks[f"E{row}"].value == (
+                "=CHOOSE(MATCH(SelectedScenario,ScenarioList,0),"
+                f"'DCF'!L{dcf_row},'DCF'!M{dcf_row},'DCF'!N{dcf_row})"
+            )
+        selected_block = range(
+            check_rows["discount_exponent_FY2027"],
+            check_rows["basic_share_crosscheck"] + 1,
+        )
+        assert all(checks[f"C{row}"].value != "selected Base" for row in selected_block)
         formulas = [
             str(cell.value)
             for sheet in workbook.worksheets

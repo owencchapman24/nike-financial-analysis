@@ -1389,8 +1389,35 @@ def _build_check_specs(
 ) -> list[dict[str, object]]:
     specs: list[dict[str, object]] = []
 
-    def add(check_id: str, category: str, scope: str, actual: str | float | int, expected: object, tolerance: float, notes: str, cached_actual: object | None = None, text: bool = False) -> None:
-        specs.append({"check_id": check_id, "category": category, "scope": scope, "actual": actual, "expected": expected, "tolerance": tolerance, "notes": notes, "cached_actual": expected if cached_actual is None else cached_actual, "text": text})
+    def add(
+        check_id: str,
+        category: str,
+        scope: str,
+        actual: str | float | int,
+        expected: object,
+        tolerance: float,
+        notes: str,
+        cached_actual: object | None = None,
+        cached_expected: object | None = None,
+        text: bool = False,
+    ) -> None:
+        resolved_expected = expected if cached_expected is None else cached_expected
+        specs.append(
+            {
+                "check_id": check_id,
+                "category": category,
+                "scope": scope,
+                "actual": actual,
+                "expected": expected,
+                "tolerance": tolerance,
+                "notes": notes,
+                "cached_actual": (
+                    resolved_expected if cached_actual is None else cached_actual
+                ),
+                "cached_expected": resolved_expected,
+                "text": text,
+            }
+        )
 
     add(
         "desktop_excel_recalculation_sentinel",
@@ -1457,22 +1484,32 @@ def _build_check_specs(
     base = next(item for item in model.scenario_valuations if item.scenario == "base")
     for index, flow in enumerate(base.explicit_cash_flows, start=0):
         col = xl_col_to_name(index + 4)
-        add(f"discount_exponent_{flow.fiscal_year}", "discounting", "selected Base", f"='DCF'!{col}14", _number(flow.discount_exponent), 1e-9, f"DCF!{col}14")
-        add(f"discount_factor_{flow.fiscal_year}", "discounting", "selected Base", f"='DCF'!{col}15", _number(flow.discount_factor), 1e-9, f"DCF!{col}15")
+        add(f"discount_exponent_{flow.fiscal_year}", "discounting", "selected scenario", f"='DCF'!{col}14", _number(flow.discount_exponent), 1e-9, f"DCF!{col}14")
+        add(f"discount_factor_{flow.fiscal_year}", "discounting", "selected scenario", f"='DCF'!{col}15", _number(flow.discount_factor), 1e-9, f"DCF!{col}15")
     bridge_rows = dcf_info["bridge_rows"]
     terminal_rows = dcf_info["terminal_rows"]
-    add("exact_cash_flow_dates", "discounting", "selected Base", "=--AND('DCF'!D12=ModelDate,'DCF'!E12=DATE(2027,5,31),'DCF'!F12=DATE(2028,5,31),'DCF'!G12=DATE(2029,5,31),'DCF'!H12=DATE(2030,5,31),'DCF'!I12=DATE(2031,5,31))", 1, 0, "DCF!D12:I12")
-    add("xnpv_reconciliation", "discounting", "selected Base", f"='DCF'!E{bridge_rows['xnpv_diff']}", 0, 0.1, "DCF XNPV and explicit EV")
-    add("terminal_bridge_revenue", "terminal bridge", "selected Base", f"='DCF'!E{terminal_rows['revenue']}", _number(base.terminal.revenue), 0.1, "DCF FY2032 bridge")
-    add("terminal_bridge_fcff", "terminal bridge", "selected Base", f"='DCF'!E{terminal_rows['fcff']}", _number(base.terminal.fcff), 0.1, "DCF FY2032 bridge")
-    add("terminal_value_formula", "terminal value", "selected Base", "='DCF'!E45", _number(base.terminal_value), 0.1, "DCF Gordon-growth formula")
-    add("enterprise_value_equation", "valuation", "selected Base", f"='DCF'!E{bridge_rows['enterprise_value']}", _number(base.enterprise_value), 0.1, "DCF enterprise-to-equity bridge")
-    add("equity_value_equation", "valuation", "selected Base", f"='DCF'!E{bridge_rows['equity_value']}", _number(base.equity_value), 0.1, "DCF enterprise-to-equity bridge")
-    add("positive_diluted_shares", "shares", "workbook", "=DilutedProxyShares", _number(model.diluted_proxy_shares), 0.000001, "Sources calculated inputs")
-    add("basic_share_crosscheck", "shares", "selected Base", f"='DCF'!E{bridge_rows['basic_share_value']}", _number(base.basic_share_value_cross_check), 0.01, "DCF basic-share denominator cross-check")
-
     all_rows = dcf_info["all_rows"]
     scenario_columns = dcf_info["scenario_columns"]
+
+    def selected_expected(metric: str) -> str:
+        row = all_rows[metric]
+        return (
+            "=CHOOSE(MATCH(SelectedScenario,ScenarioList,0),"
+            f"'DCF'!{scenario_columns['bear']}{row},"
+            f"'DCF'!{scenario_columns['base']}{row},"
+            f"'DCF'!{scenario_columns['bull']}{row})"
+        )
+
+    add("exact_cash_flow_dates", "discounting", "selected scenario", "=--AND('DCF'!D12=ModelDate,'DCF'!E12=DATE(2027,5,31),'DCF'!F12=DATE(2028,5,31),'DCF'!G12=DATE(2029,5,31),'DCF'!H12=DATE(2030,5,31),'DCF'!I12=DATE(2031,5,31))", 1, 0, "DCF!D12:I12")
+    add("xnpv_reconciliation", "discounting", "selected scenario", f"='DCF'!E{bridge_rows['xnpv_diff']}", 0, 0.1, "DCF XNPV and explicit EV")
+    add("terminal_bridge_revenue", "terminal bridge", "selected scenario", f"='DCF'!E{terminal_rows['revenue']}", selected_expected("terminal_revenue"), 0.1, "DCF FY2032 bridge", cached_expected=_number(base.terminal.revenue))
+    add("terminal_bridge_fcff", "terminal bridge", "selected scenario", f"='DCF'!E{terminal_rows['fcff']}", selected_expected("terminal_fcff"), 0.1, "DCF FY2032 bridge", cached_expected=_number(base.terminal.fcff))
+    add("terminal_value_formula", "terminal value", "selected scenario", "='DCF'!E45", selected_expected("terminal_value"), 0.1, "DCF Gordon-growth formula", cached_expected=_number(base.terminal_value))
+    add("enterprise_value_equation", "valuation", "selected scenario", f"='DCF'!E{bridge_rows['enterprise_value']}", selected_expected("enterprise_value"), 0.1, "DCF enterprise-to-equity bridge", cached_expected=_number(base.enterprise_value))
+    add("equity_value_equation", "valuation", "selected scenario", f"='DCF'!E{bridge_rows['equity_value']}", selected_expected("equity_value"), 0.1, "DCF enterprise-to-equity bridge", cached_expected=_number(base.equity_value))
+    add("positive_diluted_shares", "shares", "workbook", "=DilutedProxyShares", _number(model.diluted_proxy_shares), 0.000001, "Sources calculated inputs")
+    add("basic_share_crosscheck", "shares", "selected scenario", f"='DCF'!E{bridge_rows['basic_share_value']}", selected_expected("basic_share_value"), 0.01, "DCF basic-share denominator cross-check", cached_expected=_number(base.basic_share_value_cross_check))
+
     values = {item.scenario: item for item in model.scenario_valuations}
     for scenario in ("bear", "base", "bull"):
         col = scenario_columns[scenario]
@@ -1533,8 +1570,26 @@ def _write_checks(
             _write_formula(sheet, offset - 1, 3, actual, formats["formula"], spec["cached_actual"])
         else:
             sheet.write(offset - 1, 3, actual, formats["source"])
-        sheet.write(offset - 1, 4, spec["expected"], formats["source"])
-        _write_formula(sheet, offset - 1, 5, f"=D{offset}-E{offset}", formats["formula"], _number(spec["cached_actual"]) - _number(spec["expected"]))
+        expected = spec["expected"]
+        if isinstance(expected, str) and expected.startswith("="):
+            _write_formula(
+                sheet,
+                offset - 1,
+                4,
+                expected,
+                formats["formula"],
+                spec["cached_expected"],
+            )
+        else:
+            sheet.write(offset - 1, 4, expected, formats["source"])
+        _write_formula(
+            sheet,
+            offset - 1,
+            5,
+            f"=D{offset}-E{offset}",
+            formats["formula"],
+            _number(spec["cached_actual"]) - _number(spec["cached_expected"]),
+        )
         sheet.write_number(offset - 1, 6, float(spec["tolerance"]), formats["source"])
         _write_formula(sheet, offset - 1, 7, f'=IF(ABS(F{offset})<=G{offset},"PASS","FAIL")', formats["formula"], "PASS")
         sheet.write(offset - 1, 8, spec["notes"], formats["source_wrap"])
@@ -1721,9 +1776,17 @@ def _cell_number(workbook: openpyxl.Workbook, sheet: str, address: str) -> Decim
     return Decimal(str(value))
 
 
-def inspect_workbook(path: Path, repository_root: Path, *, require_recalculated: bool = True) -> dict[str, object]:
+def inspect_workbook(
+    path: Path,
+    repository_root: Path,
+    *,
+    require_recalculated: bool = True,
+    expected_scenario: str = "Base",
+) -> dict[str, object]:
     """Inspect workbook structure, formulas, caches, reconciliation, and privacy."""
 
+    if expected_scenario not in SCENARIO_DISPLAY:
+        raise ValueError("Expected scenario must be Bear, Base, or Bull.")
     formula_book = openpyxl.load_workbook(path, data_only=False, read_only=False, keep_links=True)
     data_book = openpyxl.load_workbook(path, data_only=True, read_only=False, keep_links=True)
     try:
@@ -1741,8 +1804,8 @@ def inspect_workbook(path: Path, repository_root: Path, *, require_recalculated:
         validations = list(formula_book["Cover"].data_validations.dataValidation)
         if len(validations) != 1 or "D6" not in str(validations[0].sqref):
             raise ValueError("Cover!D6 must contain the sole scenario data-validation control.")
-        if formula_book["Cover"]["D6"].value != "Base":
-            raise ValueError("Cover!D6 must default to Base.")
+        if formula_book["Cover"]["D6"].value != expected_scenario:
+            raise ValueError(f"Cover!D6 must contain {expected_scenario}.")
         expected_navigation = ("Sources", "Historical", "Scenarios", "WACC", "DCF", "Sensitivity", "Checks")
         for row, target in enumerate(expected_navigation, start=32):
             link = formula_book["Cover"][f"B{row}"].hyperlink
