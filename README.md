@@ -74,7 +74,9 @@ five-chart analysis and calculation detail.
 
 All three cases use the approved FY2027-FY2031 operating scenarios, a
 formula-derived 8.4874% WACC, a common 2.5% perpetual-growth rate, and exact
-fiscal-year-end discounting.
+fiscal-year-end discounting. FY2027 FCFF is still a full-year amount and the equity
+bridge retains May 31 balances, so this is an annual-model approximation rather than
+a fully rolled-forward September 4 valuation.
 
 | Scenario | Illustrative value/share | Comparison with $38.40 reference | Terminal value / EV |
 |---|---:|---:|---:|
@@ -156,6 +158,7 @@ For a detailed explanation of the model, read the
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - uv-managed CPython 3.14.5
 - Windows desktop Microsoft Excel only when regenerating the verified `.xlsx` model
+  or explicitly running the Excel integration tests
 
 From Windows PowerShell:
 
@@ -166,9 +169,11 @@ uv sync --locked --python 3.14.5
 uv run pytest
 ```
 
-The locked Python environment and all commands except Excel recalculation are
-cross-platform. The committed datasets, notebooks, charts, CSV outputs, and
-recalculated workbook are ready to inspect without rebuilding.
+The default test command is portable and never launches Excel. The locked Python
+environment and all commands except workbook regeneration and explicitly opted-in
+Excel integration tests are cross-platform. The committed datasets, notebooks,
+charts, CSV outputs, and recalculated workbook are ready to inspect without
+rebuilding.
 
 ### Deterministic offline rebuild
 
@@ -209,8 +214,9 @@ under `data/raw/sec/`. It does not print the configured user-agent value.
 [Download `nike_valuation_model.xlsx`](model/nike_valuation_model.xlsx) and select
 Bear, Base, or Bull in `Cover!D6`. The workbook contains eight visible worksheets,
 native Excel formulas, a five-by-five Base-case sensitivity table, an `XNPV`
-cross-check, and 161 passing blocking checks. Three expected warnings identify
-terminal-value dependence.
+cross-check, and separate summaries for mechanical integrity, reconciliation to the
+approved snapshot, valuation warnings, and package/build controls. Three expected
+warnings identify terminal-value dependence.
 
 Python remains the calculation source of record and reconciliation benchmark. The
 workbook has no external workbook links, live data connections, or macros. GitHub
@@ -221,7 +227,9 @@ Regeneration requires Windows desktop Excel:
 ```powershell
 uv run nike-excel-model
 uv run nike-excel-model --verify-only
-uv run pytest tests/test_excel_model.py tests/test_excel_model_artifacts.py
+uv run pytest
+uv run pytest --run-excel-integration
+uv run pytest --run-excel-integration -m excel_integration
 ```
 
 The builder creates a temporary candidate, performs a full recalculation in a
@@ -245,7 +253,8 @@ publishes the workbook only after blocking checks pass. See the
 - The headline share denominator is a documented diluted-share proxy; basic shares
   provide a cross-check.
 - The September 4 valuation date matches the reference-price and Treasury-rate
-  date. The equity bridge uses the latest completed balance sheet, dated May 31.
+  date. FY2027 FCFF covers the full fiscal year, while the equity bridge uses the
+  latest completed balance sheet, dated May 31; no interim roll-forward is modeled.
 
 ## Validation and quality controls
 
@@ -262,9 +271,11 @@ analysis:
 - Explicit-PV versus native `XNPV` reconciliation and Excel-to-Python comparison
 - Privacy, path, package-link, formula-cache, and protected-artifact checks
 
-The locked environment passes 112 automated tests. The historical dataset also
-passes 17 data-quality checks with no warnings or failures; workbook results are
-covered by the checks described in the Excel section above.
+The default portable suite passes 117 tests and reports three explicitly skipped
+desktop-Excel integration tests. Opting in on a compatible Windows/Excel machine
+runs all 120 tests. The historical dataset also passes 17 data-quality checks with
+no warnings or failures; workbook results are covered by the checks described in the
+Excel section above.
 
 ## Limitations
 

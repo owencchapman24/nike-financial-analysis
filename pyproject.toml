@@ -41,3 +41,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 addopts = "-ra"
 testpaths = ["tests"]
+markers = [
+    "excel_integration: launches Windows PowerShell and desktop Excel through COM",
+]

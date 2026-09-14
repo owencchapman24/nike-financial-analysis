@@ -32,6 +32,60 @@ def test_assumption_register_requires_exact_grid_approval_and_sources():
     assert next(c for c in checks if c.check_id == "valuation_source_resolution").status == "fail"
 
 
+def test_assumption_source_ids_require_nonempty_well_formed_resolved_tokens():
+    model = build_valuation_model(ROOT)
+    source_ids = {row["source_id"] for row in model.source_rows}
+
+    for invalid in (
+        "",
+        "   ",
+        ";",
+        "VS01;",
+        ";VS01",
+        "VS01;;VS02",
+        "VS01,VS02",
+        "UNKNOWN",
+        "VS99",
+        "VS01VS02",
+        "VS 01",
+        "VS01!",
+        "\tVS01",
+    ):
+        rows = [dict(row) for row in model.assumption_rows]
+        rows[0]["source_ids"] = invalid
+        check = next(
+            item
+            for item in validate_assumptions(rows, source_ids)
+            if item.check_id == "valuation_source_resolution"
+        )
+        assert check.status == "fail", invalid
+
+    for valid in ("VS01", "VS01;VS02", "  VS01 ; VS02  "):
+        rows = [dict(row) for row in model.assumption_rows]
+        rows[0]["source_ids"] = valid
+        check = next(
+            item
+            for item in validate_assumptions(rows, source_ids)
+            if item.check_id == "valuation_source_resolution"
+        )
+        assert check.status == "pass", valid
+
+    malformed_but_registered = "VS01VS02"
+    rows = [dict(row) for row in model.assumption_rows]
+    rows[0]["source_ids"] = malformed_but_registered
+    check = next(
+        item
+        for item in validate_assumptions(
+            rows, source_ids | {malformed_but_registered}
+        )
+        if item.check_id == "valuation_source_resolution"
+    )
+    assert check.status == "fail"
+
+    canonical_checks = validate_assumptions(model.assumption_rows, source_ids)
+    assert all(item.status == "pass" for item in canonical_checks)
+
+
 def test_forecast_contract_rejects_missing_or_invalid_rows():
     model = build_valuation_model(ROOT)
     rows = [dict(row) for row in model.forecast_rows]

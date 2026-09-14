@@ -57,6 +57,60 @@ def test_date_based_discounting_uses_xnpv_365_day_exponent():
     assert leap_exponent == Decimal("635") / Decimal("365")
 
 
+def test_terminal_value_is_independently_discounted_from_fy2031_date():
+    model_date = date(2026, 9, 4)
+    wacc = Decimal("0.10")
+    scenario = "base"
+    forecast = {
+        (scenario, f"FY{year}", "fcff"): Decimal("0")
+        for year in range(2027, 2032)
+    }
+    forecast.update(
+        {
+            (scenario, "FY2031", "revenue"): Decimal("100"),
+            (scenario, "FY2031", "gross_margin"): Decimal("0.20"),
+            (scenario, "FY2031", "sga_percent_revenue"): Decimal("0.10"),
+            (scenario, "FY2031", "normalized_tax_rate"): Decimal("0"),
+            (scenario, "FY2031", "da_percent_revenue"): Decimal("0"),
+            (scenario, "FY2031", "capex_percent_revenue"): Decimal("0"),
+            (scenario, "FY2031", "operating_nwc_percent_revenue"): Decimal("0"),
+            (scenario, "FY2031", "operating_nwc_proxy"): Decimal("0"),
+        }
+    )
+
+    result = calculate_scenario_valuation(
+        scenario,
+        forecast,
+        model_date=model_date,
+        wacc=wacc,
+        terminal_growth=Decimal("0"),
+        cash_and_investments=Decimal("0"),
+        carrying_debt=Decimal("0"),
+        preferred_stock=Decimal("0"),
+        diluted_proxy_shares=Decimal("1"),
+        basic_shares=Decimal("1"),
+        reference_market_price=Decimal("1"),
+        carrying_wacc=wacc,
+    )
+
+    terminal_value = Decimal("100")
+    correct_exponent = Decimal((date(2031, 5, 31) - model_date).days) / Decimal(
+        "365"
+    )
+    one_year_late_exponent = Decimal(
+        (date(2032, 5, 31) - model_date).days
+    ) / Decimal("365")
+    expected = terminal_value / (Decimal("1") + wacc) ** correct_exponent
+    one_year_late = terminal_value / (
+        Decimal("1") + wacc
+    ) ** one_year_late_exponent
+
+    assert result.terminal.fcff == Decimal("10.0")
+    assert result.terminal_value == terminal_value
+    assert result.pv_terminal_value == expected
+    assert result.pv_terminal_value != one_year_late
+
+
 def test_terminal_bridge_and_equity_bridge_hold_exactly():
     model = build_valuation_model(ROOT)
     forecast = {

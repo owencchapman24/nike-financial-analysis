@@ -65,6 +65,21 @@ The FY2027 exponent is 269/365 and the leap day produces an FY2028 exponent of
 mid-year convention, interest expense, debt
 repayment, dividend, or repurchase enters FCFF.
 
+This exact date arithmetic is still an annual-model approximation, not a fully
+rolled-forward September 4 valuation. FY2027 FCFF covers the complete June 2026-May
+2027 fiscal year, September 4 is the discount anchor and reference market date, and
+the equity bridge retains May 31 balances. The model does not estimate interim
+retained cash, distributions, seasonality, a residual-year forecast, or balance-sheet
+changes between those dates.
+
+As a limited timing diagnostic, May 31 to September 4 contains 96 elapsed days and
+269 days remain until the next May 31. Hypothetically removing 96/365 of full-year
+FY2027 FCFF, discounting that amount with the FY2027 factor, and leaving the equity
+bridge unchanged would reduce value per diluted-proxy share by approximately $0.424
+in Bear, $0.522 in Base, and $0.575 in Bull. These are not corrected fair values.
+Interim retained cash, distributions, seasonality, and balance-sheet changes could
+alter or offset the isolated effect.
+
 ## FY2032 terminal transition
 
 FY2032 is an explicit transition into a stable terminal state. Revenue grows at the
@@ -81,6 +96,17 @@ The model requires WACC to exceed terminal growth. A terminal-value present-valu
 share above 75% of enterprise value is shown as a warning and above 80% as a strong
 warning. These are visible dependence observations, not automatic calculation
 failures.
+
+The FY2032 bridge also implies a useful steady-state reinvestment diagnostic. Net
+reinvestment (capex less D&A plus the change in operating NWC) is approximately USD
+133.2 million in Bear, USD 181.3 million in Base, and USD 188.1 million in Bull. That
+equals 4.33%, 3.63%, and 3.00% of NOPAT, respectively; dividing the 2.5% terminal
+growth rate by those reinvestment rates implies incremental-return diagnostics of
+approximately 57.7%, 68.9%, and 83.4%. This relationship is neither Nike-reported
+ROIC nor measured historical ROIC. It reflects substantial modeled growth relative
+to simplified capex, D&A, operating-NWC, and operating-expense assumptions; high
+results do not by themselves indicate a formula error. If net reinvestment were zero
+or negative, this diagnostic would be reported as not applicable rather than forced.
 
 ## Enterprise-to-equity bridge
 
@@ -107,7 +133,11 @@ The Base-case 5×5 table uses terminal-growth columns of 1.5%, 2.0%, 2.5%, 3.0%,
 and 3.5%. WACC rows are the exact formula-derived WACC minus 1.0 percentage point,
 minus 0.5 points, unchanged, plus 0.5 points, and plus 1.0 point. Row labels are
 rounded for presentation while every cell uses the full-precision rate. The center
-cell must equal the full-precision Base headline value.
+cell uses the same coordinate-driven formula as the other 24 cells. Its independent
+headline reconciliation is performed only when the displayed center WACC and growth
+match the headline assumptions; otherwise the check is explicitly not applicable.
+Duplicate or unordered coordinates are disclosed separately from calculation
+integrity.
 
 ## Reproduction
 

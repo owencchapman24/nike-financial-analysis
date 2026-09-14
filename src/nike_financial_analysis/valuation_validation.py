@@ -5,11 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal, InvalidOperation, localcontext
+import re
 from typing import Iterable, Mapping, Sequence
 
 
 SCENARIOS = ("base", "bull", "bear")
 FORECAST_YEARS = ("FY2027", "FY2028", "FY2029", "FY2030", "FY2031")
+VALUATION_SOURCE_ID_PATTERN = re.compile(r"VS[0-9]{2}\Z", flags=re.ASCII)
 REQUIRED_ASSUMPTIONS = frozenset(
     {
         "model_date",
@@ -86,6 +88,24 @@ class ValuationCheck:
     details: str
 
 
+def _parse_valuation_source_ids(value: object) -> tuple[str, ...] | None:
+    """Parse `VS` plus two ASCII digits, separated by semicolons.
+
+    ASCII spaces may surround tokens; whitespace or punctuation inside a token is
+    invalid. Syntax is deliberately checked before exact source-register membership.
+    """
+
+    if not isinstance(value, str):
+        return None
+    tokens = tuple(part.strip(" ") for part in value.split(";"))
+    if not tokens or any(
+        not token or VALUATION_SOURCE_ID_PATTERN.fullmatch(token) is None
+        for token in tokens
+    ):
+        return None
+    return tokens
+
+
 def _check(
     check_id: str,
     category: str,
@@ -136,12 +156,24 @@ def validate_assumptions(
         return checks
 
     approved = all(row.get("owner_status") == "approved" for row in materialized)
-    source_resolution = all(
-        source_id in source_ids
-        for row in materialized
-        for source_id in row.get("source_ids", "").split(";")
-        if source_id
-    )
+    normalized_source_ids: set[str] = set()
+    registry_syntax_valid = True
+    for source_id in source_ids:
+        normalized = source_id.strip(" ") if isinstance(source_id, str) else ""
+        if VALUATION_SOURCE_ID_PATTERN.fullmatch(normalized) is None:
+            registry_syntax_valid = False
+        else:
+            normalized_source_ids.add(normalized)
+
+    source_resolution = registry_syntax_valid
+    for row in materialized:
+        tokens = _parse_valuation_source_ids(row.get("source_ids", ""))
+        if tokens is None:
+            source_resolution = False
+            break
+        if any(token not in normalized_source_ids for token in tokens):
+            source_resolution = False
+            break
     values_valid = True
     for row in materialized:
         if row["unit"] == "date":
@@ -166,9 +198,16 @@ def validate_assumptions(
                 "sources",
                 "all",
                 source_resolution,
-                actual="resolved" if source_resolution else "unknown source ID",
+                actual=(
+                    "resolved"
+                    if source_resolution
+                    else "empty, malformed, or unknown source ID"
+                ),
                 expected="resolved",
-                details="Every valuation assumption source ID resolves in the source register.",
+                details=(
+                    "Every valuation assumption source token follows VS plus two "
+                    "ASCII digits and resolves exactly in the source register."
+                ),
             ),
             _check(
                 "valuation_numeric_inputs",

@@ -37,6 +37,9 @@ from nike_financial_analysis.valuation import (
     calculate_terminal_bridge,
     verify_phase4_hashes,
 )
+from nike_financial_analysis.valuation_validation import (
+    VALUATION_SOURCE_ID_PATTERN,
+)
 
 
 WORKBOOK_PATH = Path("model/nike_valuation_model.xlsx")
@@ -51,6 +54,7 @@ SHEET_ORDER = (
     "Checks",
 )
 SCENARIO_DISPLAY = ("Bear", "Base", "Bull")
+SCENARIO_BLOCK_STARTS = {"bear": 7, "base": 32, "bull": 57}
 FORECAST_YEARS = tuple(f"FY{year}" for year in range(2027, 2032))
 HISTORICAL_YEARS = tuple(f"FY{year}" for year in range(2022, 2027))
 FIXED_PACKAGE_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
@@ -100,6 +104,10 @@ REQUIRED_DEFINED_NAMES = {
     "SelectedValuePerShare",
     "SelectedTerminalValueShare",
     "SensitivityCenter",
+    "MechanicalIntegrityStatus",
+    "ApprovedSnapshotStatus",
+    "WarningStatus",
+    "PackageBuildControlStatus",
     "ModelStatus",
 }
 
@@ -539,9 +547,8 @@ def _write_scenarios(
     sheet.set_column("C:C", 14)
     sheet.set_column("D:I", 14)
     sheet.set_column("J:J", 52)
-    blocks = {"bear": 7, "base": 32, "bull": 57}
     row_maps: dict[str, dict[str, int]] = {}
-    for scenario, start in blocks.items():
+    for scenario, start in SCENARIO_BLOCK_STARTS.items():
         sheet.write(start - 1, 1, f"{scenario.title()} scenario", formats["section"])
         for col in range(2, 10):
             sheet.write_blank(start - 1, col, None, formats["section"])
@@ -753,7 +760,13 @@ def _write_dcf(
     forecast: Mapping[tuple[str, str, str], Decimal | None],
     scenario_rows: Mapping[str, Mapping[str, int]],
 ) -> dict[str, object]:
-    _write_title(sheet, "Discounted cash flow", "Selected-scenario detail with exact fiscal-year-end discounting and an FY2032 terminal bridge", formats, 13)
+    _write_title(
+        sheet,
+        "Discounted cash flow",
+        "Full-year FY2027-FY2031 FCFF discounted from Sep. 4, 2026; May 31, 2026 equity-bridge balances are not rolled forward",
+        formats,
+        13,
+    )
     sheet.hide_gridlines(2)
     sheet.set_zoom(85)
     sheet.freeze_panes(10, 3)
@@ -1137,6 +1150,51 @@ def _write_dcf(
     }
 
 
+def _sensitivity_grid_formula(
+    *, base_fcff_row: int, row: int, column: str, helper_fcff_row: int
+) -> str:
+    """Return the canonical displayed sensitivity formula for one coordinate."""
+
+    rate_cell = f"$C{row}"
+    growth_cell = f"{column}$8"
+    helper_fcff = f"{column}{helper_fcff_row}"
+    return (
+        f"=(SUMPRODUCT('Scenarios'!E{base_fcff_row}:I{base_fcff_row},"
+        f"1/(1+{rate_cell})^(('DCF'!$E$12:$I$12-ModelDate)/365))"
+        f"+({helper_fcff}/({rate_cell}-{growth_cell}))/(1+{rate_cell})^((DATE(2031,5,31)-ModelDate)/365)"
+        f"+CashAndShortTermInvestments-CarryingDebt-RedeemablePreferredStock)/DilutedProxyShares"
+    )
+
+
+def _independent_sensitivity_value_formula(
+    base_rows: Mapping[str, int], row: int, column: str
+) -> str:
+    """Recalculate one sensitivity value without using its displayed result/helpers."""
+
+    rate = f"'Sensitivity'!$C${row}"
+    growth = f"'Sensitivity'!${column}$8"
+    revenue = f"('Scenarios'!$I${base_rows['revenue']}*(1+{growth}))"
+    operating_spread = (
+        f"('Scenarios'!$I${base_rows['gross_margin']}"
+        f"-'Scenarios'!$I${base_rows['sga_percent_revenue']})"
+    )
+    derived_operating_income = f"({revenue}*{operating_spread})"
+    terminal_fcff = (
+        f"({derived_operating_income}"
+        f"-MAX({derived_operating_income},0)*'Scenarios'!$I${base_rows['normalized_tax_rate']}"
+        f"+{revenue}*'Scenarios'!$I${base_rows['da_percent_revenue']}"
+        f"-{revenue}*'Scenarios'!$I${base_rows['capex_percent_revenue']}"
+        f"-({revenue}*'Scenarios'!$I${base_rows['operating_nwc_percent_revenue']}"
+        f"-'Scenarios'!$I${base_rows['operating_nwc_proxy']}))"
+    )
+    return (
+        f"=(SUMPRODUCT('Scenarios'!$E${base_rows['fcff']}:$I${base_rows['fcff']},"
+        f"1/(1+{rate})^(('DCF'!$E$12:$I$12-ModelDate)/365))"
+        f"+({terminal_fcff}/({rate}-{growth}))/(1+{rate})^((DATE(2031,5,31)-ModelDate)/365)"
+        f"+CashAndShortTermInvestments-CarryingDebt-RedeemablePreferredStock)/DilutedProxyShares"
+    )
+
+
 def _write_sensitivity(
     workbook: xlsxwriter.Workbook,
     sheet: xlsxwriter.worksheet.Worksheet,
@@ -1159,7 +1217,9 @@ def _write_sensitivity(
         sheet.write_blank(6, col, None, formats["section"])
     sheet.write("C8", "WACC", formats["header"])
     growth_inputs = [f"sensitivity_terminal_growth_{bp}bp" for bp in (150, 200, 250, 300, 350)]
-    growths = [Decimal("0.015"), Decimal("0.020"), Decimal("0.025"), Decimal("0.030"), Decimal("0.035")]
+    growths = sorted({cell.terminal_growth for cell in model.sensitivity_cells})
+    if len(growths) != 5:
+        raise ValueError("Sensitivity model must contain exactly five growth inputs.")
     for col, (name, growth) in enumerate(zip(growth_inputs, growths, strict=True), start=3):
         _write_formula(sheet, 7, col, f"={input_cells[name]}", formats["percent_link"], _number(growth))
     delta_names = (
@@ -1169,7 +1229,11 @@ def _write_sensitivity(
         "sensitivity_wacc_delta_plus_50bp",
         "sensitivity_wacc_delta_plus_100bp",
     )
-    deltas = [Decimal("-0.010"), Decimal("-0.005"), Decimal("0"), Decimal("0.005"), Decimal("0.010")]
+    deltas = sorted(
+        {cell.wacc - model.wacc_primary.wacc for cell in model.sensitivity_cells}
+    )
+    if len(deltas) != 5:
+        raise ValueError("Sensitivity model must contain exactly five WACC deltas.")
     sensitivity_map = {(cell.wacc, cell.terminal_growth): cell.value_per_share for cell in model.sensitivity_cells}
     for row, (name, delta) in enumerate(zip(delta_names, deltas, strict=True), start=8):
         rate = model.wacc_primary.wacc + delta
@@ -1219,7 +1283,14 @@ def _write_sensitivity(
     base_rows = scenario_rows["base"]
     for col, (growth, terminal) in enumerate(zip(growths, terminals, strict=True), start=3):
         letter = xl_col_to_name(col)
-        sheet.write_number(helper_rows["growth"] - 1, col, _number(growth), formats["percent"])
+        _write_formula(
+            sheet,
+            helper_rows["growth"] - 1,
+            col,
+            f"={letter}$8",
+            formats["percent_formula"],
+            _number(growth),
+        )
         formulas = {
             "revenue": f"='Scenarios'!I{base_rows['revenue']}*(1+{letter}{helper_rows['growth']})",
             "gross_profit": f"={letter}{helper_rows['revenue']}*'Scenarios'!I{base_rows['gross_margin']}",
@@ -1254,21 +1325,19 @@ def _write_sensitivity(
     for row_index, delta in enumerate(deltas, start=8):
         rate = model.wacc_primary.wacc + delta
         for col_index, growth in enumerate(growths, start=3):
-            if delta == 0 and growth == Decimal("0.025"):
-                formula = "=BaseValuePerShare"
-            else:
-                rate_cell = f"$C{row_index + 1}"
-                growth_cell = f"{xl_col_to_name(col_index)}$8"
-                helper_fcff = f"{xl_col_to_name(col_index)}{helper_rows['fcff']}"
-                formula = (
-                    f"=(SUMPRODUCT('Scenarios'!E{base_rows['fcff']}:I{base_rows['fcff']},"
-                    f"1/(1+{rate_cell})^(('DCF'!$E$12:$I$12-ModelDate)/365))"
-                    f"+({helper_fcff}/({rate_cell}-{growth_cell}))/(1+{rate_cell})^((DATE(2031,5,31)-ModelDate)/365)"
-                    f"+CashAndShortTermInvestments-CarryingDebt-RedeemablePreferredStock)/DilutedProxyShares"
-                )
+            formula = _sensitivity_grid_formula(
+                base_fcff_row=base_rows["fcff"],
+                row=row_index + 1,
+                column=xl_col_to_name(col_index),
+                helper_fcff_row=helper_rows["fcff"],
+            )
             _write_formula(sheet, row_index, col_index, formula, formats["per_share_formula"], _number(sensitivity_map[(rate, growth)]))
     workbook.define_name("SensitivityCenter", "='Sensitivity'!$F$11")
     sheet.conditional_format("D9:H13", {"type": "3_color_scale", "min_color": "#F4CCCC", "mid_color": "#FFF2CC", "max_color": "#D9EAD3"})
+    # The helper block intentionally changes formulas by row (for example, tax uses
+    # MAX while adjacent rows do not). Suppress only Excel's inconsistent-formula
+    # marker; formula errors remain visible and covered by workbook checks.
+    sheet.ignore_errors({"formula_differs": "D19:H30"})
     return {"grid": "D9:H13", "helper_rows": helper_rows}
 
 
@@ -1354,7 +1423,7 @@ def _write_cover(
         ("Calculated WACC", "=CalculatedWACC", model.wacc_primary.wacc, formats["percent_audit"]),
         ("Terminal growth", "=TerminalGrowth", Decimal("0.025"), formats["percent"]),
         ("PV terminal value / enterprise value", "=SelectedTerminalValueShare", valuation["base"].terminal_value_share_of_ev, formats["percent"]),
-        ("Model checks", "=ModelStatus", "PASS WITH WARNINGS", formats["cover_output"]),
+        ("Canonical publication status", "=ModelStatus", "PASS WITH WARNINGS", formats["cover_output"]),
     )
     for row, (label, formula, cached, fmt) in enumerate(selected, start=22):
         sheet.write(row - 1, 1, label, formats["body"])
@@ -1366,13 +1435,15 @@ def _write_cover(
     for row, target in enumerate(("Sources", "Historical", "Scenarios", "WACC", "DCF", "Sensitivity", "Checks"), start=32):
         sheet.write_url(row - 1, 1, f"internal:'{target}'!B2", formats["nav"], string=target)
     sheet.merge_range(
-        "B41:D42",
-        "This independent portfolio model presents illustrative historical, forecast, and valuation outputs. "
-        "It is not an investment recommendation or price target.",
+        "B41:D43",
+        "Annual-model approximation: FY2027 FCFF covers the full fiscal year; Sep. 4 is the discount anchor, "
+        "while equity-bridge balances remain at May 31. Checks separate mechanical integrity from reconciliation "
+        "to the approved snapshot. This is not an investment recommendation or price target.",
         formats["note"],
     )
     sheet.set_row(40, 24)
     sheet.set_row(41, 24)
+    sheet.set_row(42, 24)
     sheet.write("B44", "Formatting legend", formats["subheader"])
     sheet.write("B45", "Editable assumption or control", formats["legend_input"])
     sheet.write("B46", "Same-sheet formula", formats["legend_formula"])
@@ -1381,6 +1452,9 @@ def _write_cover(
 
 def _build_check_specs(
     model: ValuationModel,
+    valuation_assumptions: Sequence[Mapping[str, str]],
+    valuation_sources: Sequence[Mapping[str, str]],
+    scenario_assumptions: Sequence[Mapping[str, str]],
     forecast_rows: Mapping[tuple[str, str, str], Decimal | None],
     scenario_rows: Mapping[str, Mapping[str, int]],
     wacc_rows: Mapping[str, int],
@@ -1400,6 +1474,10 @@ def _build_check_specs(
         cached_actual: object | None = None,
         cached_expected: object | None = None,
         text: bool = False,
+        control_class: str = "Mechanical integrity",
+        difference_formula: str | None = None,
+        status_formula: str | None = None,
+        cached_status: str | None = None,
     ) -> None:
         resolved_expected = expected if cached_expected is None else cached_expected
         specs.append(
@@ -1416,6 +1494,10 @@ def _build_check_specs(
                 ),
                 "cached_expected": resolved_expected,
                 "text": text,
+                "control_class": control_class,
+                "difference_formula": difference_formula,
+                "status_formula": status_formula,
+                "cached_status": cached_status,
             }
         )
 
@@ -1428,28 +1510,67 @@ def _build_check_specs(
         0,
         "Seeded incorrectly before COM; must equal 2 only after desktop Excel recalculation.",
         -999,
+        control_class="Package/build control",
     )
-    add("valuation_input_count", "inputs", "workbook", "=COUNTA('Sources'!A7:A40)", 34, 0, "Sources!A7:A40")
-    add("valuation_inputs_approved", "inputs", "workbook", '=COUNTIF(\'Sources\'!I7:I40,"approved")', 34, 0, "Sources!I7:I40")
-    add("valuation_source_count", "sources", "workbook", "=COUNTA('Sources'!A45:A55)", 11, 0, "Sources!A45:A55")
-    add("scenario_assumption_count", "inputs", "workbook", "=COUNTA('Sources'!A60:A164)", 105, 0, "Sources!A60:A164")
-    add("scenario_assumptions_approved", "inputs", "workbook", '=COUNTIF(\'Sources\'!J60:J164,"approved")', 105, 0, "Sources!J60:J164")
-    valuation_source_expression = "'Sources'!G7:G40"
-    for source_id in (f"VS{number:02d}" for number in range(1, 12)):
-        valuation_source_expression = (
-            f'SUBSTITUTE({valuation_source_expression},"{source_id}","")'
+    package_build_control = {"control_class": "Package/build control"}
+    approved_snapshot = {"control_class": "Approved snapshot"}
+    add("valuation_input_count", "inputs", "workbook", "=COUNTA('Sources'!A7:A40)", 34, 0, "Sources!A7:A40", **package_build_control)
+    add("valuation_inputs_approved", "inputs", "workbook", '=COUNTIF(\'Sources\'!I7:I40,"approved")', 34, 0, "Sources!I7:I40", **package_build_control)
+    add("valuation_source_count", "sources", "workbook", "=COUNTA('Sources'!A45:A55)", 11, 0, "Sources!A45:A55", **package_build_control)
+    add("scenario_assumption_count", "inputs", "workbook", "=COUNTA('Sources'!A60:A164)", 105, 0, "Sources!A60:A164", **package_build_control)
+    add("scenario_assumptions_approved", "inputs", "workbook", '=COUNTIF(\'Sources\'!J60:J164,"approved")', 105, 0, "Sources!J60:J164", **package_build_control)
+
+    source_ids = [row.get("source_id", "") for row in valuation_sources]
+    if not source_ids or any(
+        VALUATION_SOURCE_ID_PATTERN.fullmatch(source_id) is None
+        for source_id in source_ids
+    ):
+        raise ValueError(
+            "Valuation source IDs must follow the canonical VS plus two ASCII digits grammar."
         )
-    valuation_source_expression = (
-        f'SUBSTITUTE({valuation_source_expression},";","")'
+    source_register_range = "'Sources'!A45:A55"
+    add(
+        "valuation_source_id_syntax",
+        "sources",
+        "valuation source register",
+        (
+            f'=SUMPRODUCT(--(LEN({source_register_range})=4),'
+            f'--(LEFT({source_register_range},2)="VS"),'
+            f'--ISNUMBER(FIND(MID({source_register_range},3,1),"0123456789")),'
+            f'--ISNUMBER(FIND(RIGHT({source_register_range},1),"0123456789")))'
+        ),
+        len(source_ids),
+        0,
+        "Every source-register ID follows VS plus exactly two ASCII digits.",
+        **package_build_control,
     )
+    valuation_source_range = "'Sources'!G7:G40"
+    normalized_source_range = (
+        f'SUBSTITUTE(SUBSTITUTE(TRIM({valuation_source_range})," ;",";"),"; ",";")'
+    )
+    valuation_source_expression = (
+        f'";"&SUBSTITUTE({normalized_source_range},";",";;")&";"'
+    )
+    for source_row in range(45, 45 + len(source_ids)):
+        valuation_source_expression = (
+            f'SUBSTITUTE({valuation_source_expression},'
+            f'";"&\'Sources\'!$A${source_row}&";","")'
+        )
     add(
         "valuation_source_id_resolution",
         "sources",
         "valuation inputs",
-        f'=SUMPRODUCT(--({valuation_source_expression}=""))',
+        (
+            f'=SUMPRODUCT(--(LEN(TRIM({valuation_source_range}))>0),'
+            f'--(LEFT({normalized_source_range},1)<>";"),'
+            f'--(RIGHT({normalized_source_range},1)<>";"),'
+            f'--ISERROR(SEARCH(";;",{normalized_source_range})),'
+            f'--({valuation_source_expression}=""))'
+        ),
         34,
         0,
-        "Every valuation-input source token resolves to VS01-VS11 in tblValuationSources.",
+        "Every semicolon-delimited VS## token resolves by exact boundary in tblValuationSources.",
+        **package_build_control,
     )
     add(
         "scenario_source_id_resolution",
@@ -1459,17 +1580,54 @@ def _build_check_specs(
         105,
         0,
         "Every scenario source ID resolves to the committed Phase 4 forecast-source register.",
+        **package_build_control,
+    )
+
+    def approved_value_literal(row: Mapping[str, str]) -> str:
+        value = row["value"]
+        if row.get("unit") == "date":
+            parsed = date.fromisoformat(value)
+            return f"DATE({parsed.year},{parsed.month},{parsed.day})"
+        return value
+
+    valuation_value_checks = ",".join(
+        f"'Sources'!D{row_number}={approved_value_literal(row)}"
+        for row_number, row in enumerate(valuation_assumptions, start=7)
+    )
+    scenario_value_checks = ",".join(
+        f"'Sources'!D{row_number}={approved_value_literal(row)}"
+        for row_number, row in enumerate(scenario_assumptions, start=60)
+    )
+    add(
+        "valuation_input_values_match_approved",
+        "inputs",
+        "valuation assumptions",
+        f"=--AND({valuation_value_checks})",
+        1,
+        0,
+        "Editable valuation values reconcile to the approved committed snapshot.",
+        **approved_snapshot,
+    )
+    add(
+        "scenario_input_values_match_approved",
+        "inputs",
+        "scenario assumptions",
+        f"=--AND({scenario_value_checks})",
+        1,
+        0,
+        "Editable scenario values reconcile to the approved committed snapshot.",
+        **approved_snapshot,
     )
 
     add("wacc_weights_sum", "wacc", "primary", f"='WACC'!E{wacc_rows['equity_weight']}+'WACC'!E{wacc_rows['debt_weight']}", 1, 1e-12, "WACC primary weights", 1)
-    add("unlevered_beta_formula", "wacc", "primary", f"='WACC'!E{wacc_rows['unlevered_beta']}", _number(model.wacc_primary.unlevered_beta), 1e-9, "WACC product-revenue-weighted beta")
-    add("relevered_beta_formula", "wacc", "primary", f"='WACC'!E{wacc_rows['levered_beta']}", _number(model.wacc_primary.levered_beta), 1e-9, "WACC relevering equation")
-    add("capm_cost_of_equity", "wacc", "primary", f"='WACC'!E{wacc_rows['cost_equity']}", _number(model.wacc_primary.cost_of_equity), 1e-9, "WACC CAPM equation")
-    add("pretax_cost_of_debt", "wacc", "primary", f"='WACC'!E{wacc_rows['pretax_debt']}", _number(model.wacc_primary.pretax_cost_of_debt), 1e-9, "Risk-free rate plus default spread")
-    add("after_tax_cost_of_debt", "wacc", "primary", f"='WACC'!E{wacc_rows['after_tax_debt']}", _number(model.wacc_primary.after_tax_cost_of_debt), 1e-9, "Pretax debt cost after operating-tax shield")
-    add("wacc_formula", "wacc", "primary", f"='WACC'!E{wacc_rows['wacc']}", _number(model.wacc_primary.wacc), 1e-9, "WACC!E calculated result")
-    add("wacc_carrying_crosscheck", "wacc", "carrying debt", f"='WACC'!J{wacc_rows['wacc']}", _number(model.wacc_carrying_cross_check.wacc), 1e-9, "WACC!J calculated result")
-    add("wacc_exceeds_terminal_growth", "terminal value", "workbook", "=CalculatedWACC-TerminalGrowth", _number(model.wacc_primary.wacc - Decimal("0.025")), 1e-9, "WACC and Sources")
+    add("unlevered_beta_formula", "wacc", "primary", f"='WACC'!E{wacc_rows['unlevered_beta']}", _number(model.wacc_primary.unlevered_beta), 1e-9, "WACC product-revenue-weighted beta", **approved_snapshot)
+    add("relevered_beta_formula", "wacc", "primary", f"='WACC'!E{wacc_rows['levered_beta']}", _number(model.wacc_primary.levered_beta), 1e-9, "WACC relevering equation", **approved_snapshot)
+    add("capm_cost_of_equity", "wacc", "primary", f"='WACC'!E{wacc_rows['cost_equity']}", _number(model.wacc_primary.cost_of_equity), 1e-9, "WACC CAPM equation", **approved_snapshot)
+    add("pretax_cost_of_debt", "wacc", "primary", f"='WACC'!E{wacc_rows['pretax_debt']}", _number(model.wacc_primary.pretax_cost_of_debt), 1e-9, "Risk-free rate plus default spread", **approved_snapshot)
+    add("after_tax_cost_of_debt", "wacc", "primary", f"='WACC'!E{wacc_rows['after_tax_debt']}", _number(model.wacc_primary.after_tax_cost_of_debt), 1e-9, "Pretax debt cost after operating-tax shield", **approved_snapshot)
+    add("wacc_formula", "wacc", "primary", f"='WACC'!E{wacc_rows['wacc']}", _number(model.wacc_primary.wacc), 1e-9, "WACC!E calculated result", **approved_snapshot)
+    add("wacc_carrying_crosscheck", "wacc", "carrying debt", f"='WACC'!J{wacc_rows['wacc']}", _number(model.wacc_carrying_cross_check.wacc), 1e-9, "WACC!J calculated result", **approved_snapshot)
+    add("wacc_exceeds_terminal_growth", "terminal value", "workbook", "=--(CalculatedWACC>TerminalGrowth)", 1, 0, "Headline WACC must exceed headline terminal growth.")
 
     for scenario in ("bear", "base", "bull"):
         rows = scenario_rows[scenario]
@@ -1477,15 +1635,30 @@ def _build_check_specs(
             col = xl_col_to_name(year_offset)
             for metric in ("revenue", "derived_operating_income", "operating_nwc_proxy", "fcff"):
                 expected = forecast_rows[(scenario, year, metric)]
-                add(f"forecast_{scenario}_{year}_{metric}", "forecast reconciliation", scenario, f"='Scenarios'!{col}{rows[metric]}", _number(expected), 0.1, f"Scenarios!{col}{rows[metric]}")
-            identity = f"='Scenarios'!{col}{rows['nopat']}+'Scenarios'!{col}{rows['depreciation_and_amortization']}-'Scenarios'!{col}{rows['capital_expenditures']}-'Scenarios'!{col}{rows['change_in_operating_nwc']}"
-            add(f"fcff_identity_{scenario}_{year}", "FCFF", scenario, identity, _number(forecast_rows[(scenario, year, "fcff")]), 1e-7, f"Scenarios!{col}{rows['fcff']}")
+                add(f"forecast_{scenario}_{year}_{metric}", "forecast reconciliation", scenario, f"='Scenarios'!{col}{rows[metric]}", _number(expected), 0.1, f"Scenarios!{col}{rows[metric]}", **approved_snapshot)
+            identity_difference = (
+                f"='Scenarios'!{col}{rows['fcff']}-("
+                f"'Scenarios'!{col}{rows['nopat']}+"
+                f"'Scenarios'!{col}{rows['depreciation_and_amortization']}-"
+                f"'Scenarios'!{col}{rows['capital_expenditures']}-"
+                f"'Scenarios'!{col}{rows['change_in_operating_nwc']})"
+            )
+            add(
+                f"fcff_identity_{scenario}_{year}",
+                "FCFF",
+                scenario,
+                identity_difference,
+                0,
+                1e-7,
+                f"Scenarios!{col}{rows['fcff']} equals NOPAT + D&A - capex - change in operating NWC.",
+                cached_actual=0,
+            )
 
     base = next(item for item in model.scenario_valuations if item.scenario == "base")
     for index, flow in enumerate(base.explicit_cash_flows, start=0):
         col = xl_col_to_name(index + 4)
-        add(f"discount_exponent_{flow.fiscal_year}", "discounting", "selected scenario", f"='DCF'!{col}14", _number(flow.discount_exponent), 1e-9, f"DCF!{col}14")
-        add(f"discount_factor_{flow.fiscal_year}", "discounting", "selected scenario", f"='DCF'!{col}15", _number(flow.discount_factor), 1e-9, f"DCF!{col}15")
+        add(f"discount_exponent_{flow.fiscal_year}", "discounting", "selected scenario", f"='DCF'!{col}14", _number(flow.discount_exponent), 1e-9, f"DCF!{col}14", **approved_snapshot)
+        add(f"discount_factor_{flow.fiscal_year}", "discounting", "selected scenario", f"='DCF'!{col}15", _number(flow.discount_factor), 1e-9, f"DCF!{col}15", **approved_snapshot)
     bridge_rows = dcf_info["bridge_rows"]
     terminal_rows = dcf_info["terminal_rows"]
     all_rows = dcf_info["all_rows"]
@@ -1507,35 +1680,130 @@ def _build_check_specs(
     add("terminal_value_formula", "terminal value", "selected scenario", "='DCF'!E45", selected_expected("terminal_value"), 0.1, "DCF Gordon-growth formula", cached_expected=_number(base.terminal_value))
     add("enterprise_value_equation", "valuation", "selected scenario", f"='DCF'!E{bridge_rows['enterprise_value']}", selected_expected("enterprise_value"), 0.1, "DCF enterprise-to-equity bridge", cached_expected=_number(base.enterprise_value))
     add("equity_value_equation", "valuation", "selected scenario", f"='DCF'!E{bridge_rows['equity_value']}", selected_expected("equity_value"), 0.1, "DCF enterprise-to-equity bridge", cached_expected=_number(base.equity_value))
-    add("positive_diluted_shares", "shares", "workbook", "=DilutedProxyShares", _number(model.diluted_proxy_shares), 0.000001, "Sources calculated inputs")
+    add("positive_diluted_shares", "shares", "workbook", "=--(DilutedProxyShares>0)", 1, 0, "Diluted proxy shares must remain positive.")
     add("basic_share_crosscheck", "shares", "selected scenario", f"='DCF'!E{bridge_rows['basic_share_value']}", selected_expected("basic_share_value"), 0.01, "DCF basic-share denominator cross-check", cached_expected=_number(base.basic_share_value_cross_check))
 
     values = {item.scenario: item for item in model.scenario_valuations}
     for scenario in ("bear", "base", "bull"):
         col = scenario_columns[scenario]
         value = values[scenario]
-        add(f"python_value_per_share_{scenario}", "Python reconciliation", scenario, f"='DCF'!{col}{all_rows['value_per_share']}", _number(value.value_per_share), 0.01, "DCF all-scenario formula block")
-        add(f"python_enterprise_value_{scenario}", "Python reconciliation", scenario, f"='DCF'!{col}{all_rows['enterprise_value']}", _number(value.enterprise_value), 0.1, "DCF all-scenario formula block")
-        add(f"python_terminal_fcff_{scenario}", "terminal bridge", scenario, f"='DCF'!{col}{all_rows['terminal_fcff']}", _number(value.terminal.fcff), 0.1, "DCF all-scenario formula block")
+        add(f"python_value_per_share_{scenario}", "Python reconciliation", scenario, f"='DCF'!{col}{all_rows['value_per_share']}", _number(value.value_per_share), 0.01, "DCF all-scenario formula block", **approved_snapshot)
+        add(f"python_enterprise_value_{scenario}", "Python reconciliation", scenario, f"='DCF'!{col}{all_rows['enterprise_value']}", _number(value.enterprise_value), 0.1, "DCF all-scenario formula block", **approved_snapshot)
+        add(f"python_terminal_fcff_{scenario}", "terminal bridge", scenario, f"='DCF'!{col}{all_rows['terminal_fcff']}", _number(value.terminal.fcff), 0.1, "DCF all-scenario formula block", **approved_snapshot)
     add("scenario_value_ordering", "scenario coherence", "workbook", f"=--AND('DCF'!{scenario_columns['bear']}{all_rows['value_per_share']}<'DCF'!{scenario_columns['base']}{all_rows['value_per_share']},'DCF'!{scenario_columns['base']}{all_rows['value_per_share']}<'DCF'!{scenario_columns['bull']}{all_rows['value_per_share']})", 1, 0, "Bear < Base < Bull illustrative values")
 
     grid_rows = list(range(9, 14))
     grid_cols = list("DEFGH")
+    base_scenario_rows = scenario_rows["base"]
     ordered_cells = sorted(model.sensitivity_cells, key=lambda cell: (cell.wacc, cell.terminal_growth))
     for row, rate_group in zip(grid_rows, [ordered_cells[i:i + 5] for i in range(0, 25, 5)], strict=True):
         for col, cell in zip(grid_cols, rate_group, strict=True):
-            add(f"sensitivity_{row}_{col}", "sensitivity", "Base", f"='Sensitivity'!{col}{row}", _number(cell.value_per_share), 0.01, f"Sensitivity!{col}{row}")
-    add("sensitivity_center", "sensitivity", "Base", "=SensitivityCenter", _number(base.value_per_share), 0, "Sensitivity!F11")
+            add(
+                f"sensitivity_calculation_{col}{row}",
+                "sensitivity",
+                "Base",
+                f"='Sensitivity'!{col}{row}",
+                _independent_sensitivity_value_formula(
+                    base_scenario_rows, row, col
+                ),
+                1e-9,
+                f"Independent current-coordinate calculation for Sensitivity!{col}{row}.",
+                cached_actual=_number(cell.value_per_share),
+                cached_expected=_number(cell.value_per_share),
+            )
+            add(f"sensitivity_{row}_{col}", "sensitivity", "Base", f"='Sensitivity'!{col}{row}", _number(cell.value_per_share), 0.01, f"Sensitivity!{col}{row}", **approved_snapshot)
+    center_coordinates_match = (
+        "AND(ABS('Sensitivity'!$C$11-CalculatedWACC)<=1E-9,"
+        "ABS('Sensitivity'!$F$8-TerminalGrowth)<=1E-9)"
+    )
+    add(
+        "sensitivity_center",
+        "sensitivity",
+        "Base",
+        "=SensitivityCenter",
+        "=BaseValuePerShare",
+        0.01,
+        "Reconcile only when the displayed center coordinates equal the headline WACC and terminal growth.",
+        cached_actual=_number(base.value_per_share),
+        cached_expected=_number(base.value_per_share),
+        control_class="Conditional / input warning",
+        difference_formula=f'=IF({center_coordinates_match},D{{row}}-E{{row}},"")',
+        status_formula=(
+            f'=IF(NOT({center_coordinates_match}),'
+            '"NOT APPLICABLE — COORDINATES DIFFER",'
+            'IF(AND(ISNUMBER(D{row}),ISNUMBER(E{row}),ISNUMBER(G{row})),'
+            'IF(ABS(F{row})<=G{row},"PASS","FAIL"),"UNVERIFIED"))'
+        ),
+        cached_status="PASS",
+    )
+    add(
+        "sensitivity_growth_coordinate_order",
+        "sensitivity coordinates",
+        "Base",
+        "=--AND('Sensitivity'!D8<'Sensitivity'!E8,'Sensitivity'!E8<'Sensitivity'!F8,'Sensitivity'!F8<'Sensitivity'!G8,'Sensitivity'!G8<'Sensitivity'!H8)",
+        1,
+        0,
+        "Duplicate or unordered growth coordinates are an input warning; cell arithmetic is evaluated separately.",
+        control_class="Conditional / input warning",
+        status_formula='=IF(AND(ISNUMBER(D{row}),ISNUMBER(E{row})),IF(D{row}=E{row},"PASS","INPUT WARNING"),"UNVERIFIED")',
+        cached_status="PASS",
+    )
+    add(
+        "sensitivity_wacc_coordinate_order",
+        "sensitivity coordinates",
+        "Base",
+        "=--AND('Sensitivity'!C9<'Sensitivity'!C10,'Sensitivity'!C10<'Sensitivity'!C11,'Sensitivity'!C11<'Sensitivity'!C12,'Sensitivity'!C12<'Sensitivity'!C13)",
+        1,
+        0,
+        "Duplicate or unordered WACC coordinates are an input warning; cell arithmetic is evaluated separately.",
+        control_class="Conditional / input warning",
+        status_formula='=IF(AND(ISNUMBER(D{row}),ISNUMBER(E{row})),IF(D{row}=E{row},"PASS","INPUT WARNING"),"UNVERIFIED")',
+        cached_status="PASS",
+    )
     for row in grid_rows:
-        add(f"sensitivity_growth_monotonicity_{row}", "sensitivity", "Base", f"=--AND('Sensitivity'!D{row}<'Sensitivity'!E{row},'Sensitivity'!E{row}<'Sensitivity'!F{row},'Sensitivity'!F{row}<'Sensitivity'!G{row},'Sensitivity'!G{row}<'Sensitivity'!H{row})", 1, 0, f"Sensitivity!D{row}:H{row}")
+        growths_strictly_increase = "AND('Sensitivity'!$D$8<'Sensitivity'!$E$8,'Sensitivity'!$E$8<'Sensitivity'!$F$8,'Sensitivity'!$F$8<'Sensitivity'!$G$8,'Sensitivity'!$G$8<'Sensitivity'!$H$8)"
+        add(
+            f"sensitivity_growth_monotonicity_{row}",
+            "sensitivity",
+            "Base",
+            f"=--AND('Sensitivity'!D{row}<'Sensitivity'!E{row},'Sensitivity'!E{row}<'Sensitivity'!F{row},'Sensitivity'!F{row}<'Sensitivity'!G{row},'Sensitivity'!G{row}<'Sensitivity'!H{row})",
+            1,
+            0,
+            f"Sensitivity!D{row}:H{row}",
+            control_class="Conditional / input warning",
+            status_formula=(
+                f'=IF(NOT({growths_strictly_increase}),'
+                '"NOT APPLICABLE — DUPLICATE OR UNORDERED COORDINATES",'
+                'IF(AND(ISNUMBER(D{row}),ISNUMBER(E{row})),'
+                'IF(D{row}=E{row},"PASS","FAIL"),"UNVERIFIED"))'
+            ),
+            cached_status="PASS",
+        )
     for col in grid_cols:
-        add(f"sensitivity_wacc_monotonicity_{col}", "sensitivity", "Base", f"=--AND('Sensitivity'!{col}9>'Sensitivity'!{col}10,'Sensitivity'!{col}10>'Sensitivity'!{col}11,'Sensitivity'!{col}11>'Sensitivity'!{col}12,'Sensitivity'!{col}12>'Sensitivity'!{col}13)", 1, 0, f"Sensitivity!{col}9:{col}13")
+        waccs_strictly_increase = "AND('Sensitivity'!$C$9<'Sensitivity'!$C$10,'Sensitivity'!$C$10<'Sensitivity'!$C$11,'Sensitivity'!$C$11<'Sensitivity'!$C$12,'Sensitivity'!$C$12<'Sensitivity'!$C$13)"
+        add(
+            f"sensitivity_wacc_monotonicity_{col}",
+            "sensitivity",
+            "Base",
+            f"=--AND('Sensitivity'!{col}9>'Sensitivity'!{col}10,'Sensitivity'!{col}10>'Sensitivity'!{col}11,'Sensitivity'!{col}11>'Sensitivity'!{col}12,'Sensitivity'!{col}12>'Sensitivity'!{col}13)",
+            1,
+            0,
+            f"Sensitivity!{col}9:{col}13",
+            control_class="Conditional / input warning",
+            status_formula=(
+                f'=IF(NOT({waccs_strictly_increase}),'
+                '"NOT APPLICABLE — DUPLICATE OR UNORDERED COORDINATES",'
+                'IF(AND(ISNUMBER(D{row}),ISNUMBER(E{row})),'
+                'IF(D{row}=E{row},"PASS","FAIL"),"UNVERIFIED"))'
+            ),
+            cached_status="PASS",
+        )
 
     error_formula = "=SUMPRODUCT(--ISERROR('Scenarios'!D9:I75))+SUMPRODUCT(--ISERROR('WACC'!E9:E36))+SUMPRODUCT(--ISERROR('WACC'!J9:J36))+SUMPRODUCT(--ISERROR('DCF'!D12:N71))+SUMPRODUCT(--ISERROR('Sensitivity'!C8:H30))"
     add("formula_error_scan", "structure", "workbook", error_formula, 0, 0, "Formula-bearing ranges")
-    add("external_workbook_links", "structure", "package", 0, 0, 0, "Verified by package inspection")
-    add("data_connections", "structure", "package", 0, 0, 0, "Verified by package inspection")
-    add("vba_macros", "structure", "package", 0, 0, 0, "Verified by package inspection")
+    add("external_workbook_links", "structure", "package", 0, 0, 0, "Verified by package inspection", **package_build_control)
+    add("data_connections", "structure", "package", 0, 0, 0, "Verified by package inspection", **package_build_control)
+    add("vba_macros", "structure", "package", 0, 0, 0, "Verified by package inspection", **package_build_control)
     return specs
 
 
@@ -1547,24 +1815,34 @@ def _write_checks(
     model: ValuationModel,
     dcf_info: Mapping[str, object],
 ) -> int:
-    _write_title(sheet, "Model checks", "Independent assertions observe the model but never feed valuation calculations", formats, 9)
+    _write_title(sheet, "Model checks", "Mechanical integrity, approved-snapshot reconciliation, warnings, and package/build controls remain distinct", formats, 9)
     sheet.hide_gridlines(2)
     sheet.set_zoom(80)
     sheet.freeze_panes(8, 3)
-    sheet.set_column("A:A", 28)
-    sheet.set_column("B:B", 23)
-    sheet.set_column("C:C", 20)
-    sheet.set_column("D:G", 18)
-    sheet.set_column("H:H", 20)
-    sheet.set_column("I:I", 46)
-    sheet.write("A6", "Aggregate status", formats["subheader"])
+    sheet.set_column("A:A", 48)
+    sheet.set_column("B:B", 28)
+    sheet.set_column("C:C", 32)
+    sheet.set_column("D:F", 18)
+    sheet.set_column("G:G", 26)
+    sheet.set_column("H:H", 58)
+    sheet.set_column("I:I", 56)
+    sheet.write("A5", "Mechanical integrity", formats["subheader"])
+    sheet.write("C5", "Approved snapshot", formats["subheader"])
+    sheet.write("E5", "Warnings", formats["subheader"])
+    sheet.write("G5", "Package/build controls", formats["subheader"])
+    sheet.write("H5", "Canonical publication gate", formats["subheader"])
     sheet.write("A8", "Check ID", formats["header"])
-    sheet.write_row("B8", ["Category", "Scope", "Actual", "Expected", "Difference", "Tolerance", "Status", "Notes / fix location"], formats["header"])
+    sheet.write_row("B8", ["Control class", "Category / scope", "Actual", "Expected", "Difference", "Tolerance", "Status", "Notes / fix location"], formats["header"])
     start_row = 9
     for offset, spec in enumerate(specs, start=start_row):
         sheet.write(offset - 1, 0, spec["check_id"], formats["body"])
-        sheet.write(offset - 1, 1, spec["category"], formats["body"])
-        sheet.write(offset - 1, 2, spec["scope"], formats["body"])
+        sheet.write(offset - 1, 1, spec["control_class"], formats["body"])
+        sheet.write(
+            offset - 1,
+            2,
+            f"{spec['category']} — {spec['scope']}",
+            formats["body"],
+        )
         actual = spec["actual"]
         if isinstance(actual, str) and actual.startswith("="):
             _write_formula(sheet, offset - 1, 3, actual, formats["formula"], spec["cached_actual"])
@@ -1582,16 +1860,54 @@ def _write_checks(
             )
         else:
             sheet.write(offset - 1, 4, expected, formats["source"])
+        difference_formula = spec["difference_formula"]
+        if difference_formula is None:
+            difference_formula = f"=D{offset}-E{offset}"
+            cached_difference: object = _number(spec["cached_actual"]) - _number(
+                spec["cached_expected"]
+            )
+        else:
+            difference_formula = str(difference_formula).format(row=offset)
+            cached_difference = _number(spec["cached_actual"]) - _number(
+                spec["cached_expected"]
+            )
         _write_formula(
             sheet,
             offset - 1,
             5,
-            f"=D{offset}-E{offset}",
+            difference_formula,
             formats["formula"],
-            _number(spec["cached_actual"]) - _number(spec["cached_expected"]),
+            cached_difference,
         )
         sheet.write_number(offset - 1, 6, float(spec["tolerance"]), formats["source"])
-        _write_formula(sheet, offset - 1, 7, f'=IF(ABS(F{offset})<=G{offset},"PASS","FAIL")', formats["formula"], "PASS")
+        status_formula = spec["status_formula"]
+        if status_formula is None:
+            success = (
+                "MATCHES APPROVED"
+                if spec["control_class"] == "Approved snapshot"
+                else "PASS"
+            )
+            failure = (
+                "DIFFERS FROM APPROVED"
+                if spec["control_class"] == "Approved snapshot"
+                else "FAIL"
+            )
+            status_formula = (
+                f'=IF(AND(ISNUMBER(D{offset}),ISNUMBER(E{offset}),ISNUMBER(F{offset}),ISNUMBER(G{offset})),'
+                f'IF(ABS(F{offset})<=G{offset},"{success}","{failure}"),"UNVERIFIED")'
+            )
+            cached_status = success
+        else:
+            status_formula = str(status_formula).format(row=offset)
+            cached_status = spec["cached_status"] or "UNVERIFIED"
+        _write_formula(
+            sheet,
+            offset - 1,
+            7,
+            status_formula,
+            formats["formula"],
+            cached_status,
+        )
         sheet.write(offset - 1, 8, spec["notes"], formats["source_wrap"])
 
     terminal_start = start_row + len(specs)
@@ -1602,8 +1918,8 @@ def _write_checks(
         col = scenario_columns[scenario]
         share = next(item for item in model.scenario_valuations if item.scenario == scenario).terminal_value_share_of_ev
         sheet.write(row - 1, 0, f"terminal_value_dependence_{scenario}", formats["body"])
-        sheet.write(row - 1, 1, "terminal value", formats["body"])
-        sheet.write(row - 1, 2, scenario, formats["body"])
+        sheet.write(row - 1, 1, "Valuation warning", formats["body"])
+        sheet.write(row - 1, 2, f"terminal value — {scenario}", formats["body"])
         _write_formula(sheet, row - 1, 3, f"='DCF'!{col}{all_rows['terminal_share']}", formats["percent_formula"], _number(share))
         sheet.write(row - 1, 4, "warning >75%; strong warning >80%", formats["source_wrap"])
         sheet.write_blank(row - 1, 5, None, formats["body"])
@@ -1613,10 +1929,50 @@ def _write_checks(
         sheet.write(row - 1, 8, "Dependence observation; does not block valuation output.", formats["source_wrap"])
 
     last_row = terminal_start + 2
-    model_status_formula = f'=IF(COUNTIF(H{start_row}:H{last_row},"FAIL")>0,"FAIL",IF(COUNTIF(H{start_row}:H{last_row},"UNVERIFIED")>0,"UNVERIFIED",IF(COUNTIF(H{start_row}:H{last_row},"WARNING")+COUNTIF(H{start_row}:H{last_row},"STRONG WARNING")>0,"PASS WITH WARNINGS","PASS")))'
+    class_range = f"B{start_row}:B{last_row}"
+    status_range = f"H{start_row}:H{last_row}"
+    mechanical_status = (
+        f'=IF(COUNTIF({class_range},"Mechanical integrity")=0,"UNVERIFIED",'
+        f'IF(COUNTIFS({class_range},"Mechanical integrity",{status_range},"FAIL")>0,"FAIL",'
+        f'IF(COUNTIFS({class_range},"Mechanical integrity",{status_range},"<>PASS")>0,"UNVERIFIED","PASS")))'
+    )
+    snapshot_status = (
+        f'=IF(COUNTIF({class_range},"Approved snapshot")=0,"UNVERIFIED",'
+        f'IF(COUNTIFS({class_range},"Approved snapshot",{status_range},"DIFFERS FROM APPROVED")>0,"DIFFERS FROM APPROVED",'
+        f'IF(COUNTIFS({class_range},"Approved snapshot",{status_range},"<>MATCHES APPROVED")>0,"UNVERIFIED","MATCHES APPROVED")))'
+    )
+    warning_status = (
+        f'=IF(COUNTIF({class_range},"*warning")=0,"UNVERIFIED",'
+        f'IF(COUNTIFS({class_range},"*warning",{status_range},"*WARNING*")>0,"WARNINGS PRESENT",'
+        f'IF(COUNTIFS({class_range},"*warning",{status_range},"<>PASS")>0,"UNVERIFIED","PASS")))'
+    )
+    package_build_control_status = (
+        f'=IF(COUNTIF({class_range},"Package/build control")=0,"UNVERIFIED",'
+        f'IF(COUNTIFS({class_range},"Package/build control",{status_range},"FAIL")>0,"FAIL",'
+        f'IF(COUNTIFS({class_range},"Package/build control",{status_range},"<>PASS")>0,"UNVERIFIED","PASS")))'
+    )
+    model_status_formula = (
+        '=IF(OR(A6="FAIL",G6="FAIL"),"FAIL",'
+        'IF(OR(A6<>"PASS",G6<>"PASS"),"UNVERIFIED",'
+        'IF(C6="DIFFERS FROM APPROVED","NOT PUBLISHABLE — DIFFERS FROM APPROVED",'
+        'IF(C6<>"MATCHES APPROVED","UNVERIFIED",'
+        'IF(E6="WARNINGS PRESENT","PASS WITH WARNINGS",'
+        'IF(E6="PASS","PASS","UNVERIFIED"))))))'
+    )
+    _write_formula(sheet, 5, 0, mechanical_status, formats["pass"], "PASS")
+    _write_formula(sheet, 5, 2, snapshot_status, formats["pass"], "MATCHES APPROVED")
+    _write_formula(sheet, 5, 4, warning_status, formats["warning"], "WARNINGS PRESENT")
+    _write_formula(sheet, 5, 6, package_build_control_status, formats["pass"], "PASS")
     _write_formula(sheet, 5, 7, model_status_formula, formats["warning"], "PASS WITH WARNINGS")
+    workbook.define_name("MechanicalIntegrityStatus", "='Checks'!$A$6")
+    workbook.define_name("ApprovedSnapshotStatus", "='Checks'!$C$6")
+    workbook.define_name("WarningStatus", "='Checks'!$E$6")
+    workbook.define_name("PackageBuildControlStatus", "='Checks'!$G$6")
     workbook.define_name("ModelStatus", "='Checks'!$H$6")
     sheet.conditional_format(f"H{start_row}:H{last_row}", {"type": "text", "criteria": "containing", "value": "FAIL", "format": formats["fail"]})
+    sheet.conditional_format(f"H{start_row}:H{last_row}", {"type": "text", "criteria": "containing", "value": "DIFFERS", "format": formats["warning"]})
+    sheet.conditional_format(f"H{start_row}:H{last_row}", {"type": "text", "criteria": "containing", "value": "NOT APPLICABLE", "format": formats["warning"]})
+    sheet.conditional_format(f"H{start_row}:H{last_row}", {"type": "text", "criteria": "containing", "value": "UNVERIFIED", "format": formats["fail"]})
     sheet.conditional_format(f"H{start_row}:H{last_row}", {"type": "text", "criteria": "containing", "value": "WARNING", "format": formats["warning"]})
     sheet.conditional_format(f"H{start_row}:H{last_row}", {"type": "text", "criteria": "containing", "value": "PASS", "format": formats["pass"]})
     return last_row
@@ -1660,7 +2016,17 @@ def build_workbook(repository_root: Path, output_path: Path) -> dict[str, object
     wacc_rows = _write_wacc(workbook, sheets["WACC"], formats, model)
     dcf_info = _write_dcf(workbook, sheets["DCF"], formats, model, forecast, scenario_rows)
     sensitivity_info = _write_sensitivity(workbook, sheets["Sensitivity"], formats, model, forecast, scenario_rows, input_cells)
-    check_specs = _build_check_specs(model, forecast, scenario_rows, wacc_rows, dcf_info, sensitivity_info)
+    check_specs = _build_check_specs(
+        model,
+        assumptions,
+        sources,
+        scenario_assumptions,
+        forecast,
+        scenario_rows,
+        wacc_rows,
+        dcf_info,
+        sensitivity_info,
+    )
     check_rows = _write_checks(workbook, sheets["Checks"], formats, check_specs, model, dcf_info)
     _write_cover(workbook, sheets["Cover"], formats, model)
     workbook.close()
@@ -1776,6 +2142,112 @@ def _cell_number(workbook: openpyxl.Workbook, sheet: str, address: str) -> Decim
     return Decimal(str(value))
 
 
+def _embedded_value_matches(actual: object, expected: str, unit: str = "") -> bool:
+    """Compare one embedded workbook value with its committed CSV representation."""
+
+    if expected == "":
+        return actual is None
+    if unit == "date" or re.fullmatch(r"\d{4}-\d{2}-\d{2}", expected):
+        if not isinstance(actual, (date, datetime)):
+            return False
+        actual_date = actual.date() if isinstance(actual, datetime) else actual
+        return actual_date.isoformat() == expected
+    if unit in {"decimal", "USD millions", "USD per share", "millions", "x"}:
+        if actual is None or isinstance(actual, str):
+            return False
+        return abs(Decimal(str(actual)) - Decimal(expected)) <= Decimal("1E-9")
+    return actual == expected
+
+
+def _assert_embedded_inputs_match(
+    workbook: openpyxl.Workbook, repository_root: Path
+) -> None:
+    """Reject a publication candidate whose embedded inputs differ from Git inputs."""
+
+    sheet = workbook["Sources"]
+    tables = (
+        (
+            _read_csv(repository_root / "config/valuation_assumptions.csv"),
+            7,
+            lambda row, field: (
+                row.get("unit", "")
+                if field == "value"
+                else "date"
+                if field == "observation_date" and row.get(field)
+                else ""
+            ),
+        ),
+        (
+            _read_csv(repository_root / "config/valuation_sources.csv"),
+            45,
+            lambda row, field: (
+                "date"
+                if field
+                in {
+                    "publication_date",
+                    "observation_date",
+                    "information_cutoff",
+                    "retrieval_date",
+                }
+                and row.get(field)
+                else ""
+            ),
+        ),
+        (
+            _read_csv(repository_root / "config/scenario_assumptions.csv"),
+            60,
+            lambda row, field: row.get("unit", "") if field == "value" else "",
+        ),
+    )
+    for rows, start_row, unit_for in tables:
+        if not rows:
+            raise ValueError("A required committed input register is empty.")
+        fields = list(rows[0])
+        for row_number, row in enumerate(rows, start=start_row):
+            for column_number, field in enumerate(fields, start=1):
+                if not _embedded_value_matches(
+                    sheet.cell(row_number, column_number).value,
+                    row[field],
+                    unit_for(row, field),
+                ):
+                    raise ValueError(
+                        "Workbook embedded inputs differ from the approved committed snapshot."
+                    )
+
+
+def _normalized_sensitivity_formula(formula: object) -> str:
+    """Normalize only Excel's harmless quote removal around simple sheet names."""
+
+    return str(formula).replace("'Scenarios'!", "Scenarios!").replace(
+        "'DCF'!", "DCF!"
+    )
+
+
+def _assert_sensitivity_center_formula_contract(workbook: openpyxl.Workbook) -> None:
+    """Reject the reproduced same-value replacement of the canonical center formula."""
+
+    base_fcff_row = SCENARIO_BLOCK_STARTS["base"] + next(
+        offset
+        for offset, (metric, _label, _unit, _driver) in enumerate(
+            SCENARIO_METRICS, start=2
+        )
+        if metric == "fcff"
+    )
+    expected = _sensitivity_grid_formula(
+        base_fcff_row=base_fcff_row,
+        row=11,
+        column="F",
+        helper_fcff_row=29,
+    )
+    actual = workbook["Sensitivity"]["F11"].value
+    if _normalized_sensitivity_formula(actual) != _normalized_sensitivity_formula(
+        expected
+    ):
+        raise ValueError(
+            "Sensitivity formula-integrity mismatch at Sensitivity!F11."
+        )
+
+
 def inspect_workbook(
     path: Path,
     repository_root: Path,
@@ -1806,6 +2278,8 @@ def inspect_workbook(
             raise ValueError("Cover!D6 must contain the sole scenario data-validation control.")
         if formula_book["Cover"]["D6"].value != expected_scenario:
             raise ValueError(f"Cover!D6 must contain {expected_scenario}.")
+        _assert_embedded_inputs_match(formula_book, repository_root)
+        _assert_sensitivity_center_formula_contract(formula_book)
         expected_navigation = ("Sources", "Historical", "Scenarios", "WACC", "DCF", "Sensitivity", "Checks")
         for row, target in enumerate(expected_navigation, start=32):
             link = formula_book["Cover"][f"B{row}"].hyperlink
@@ -1878,6 +2352,21 @@ def inspect_workbook(
         xnpv_difference = abs(_cell_number(data_book, "DCF", "E69"))
         if xnpv_difference > Decimal("0.1"):
             raise ValueError("Native XNPV does not reconcile to explicit date-exponent PV.")
+        center_wacc_difference = abs(
+            _cell_number(data_book, "Sensitivity", "C11")
+            - _cell_number(data_book, "WACC", "E36")
+        )
+        center_growth_difference = abs(
+            _cell_number(data_book, "Sensitivity", "F8")
+            - _cell_number(data_book, "Sources", "D30")
+        )
+        if (
+            center_wacc_difference > Decimal("1E-9")
+            or center_growth_difference > Decimal("1E-9")
+        ):
+            raise ValueError(
+                "Canonical workbook sensitivity-center coordinates do not match headline assumptions."
+            )
         center_difference = abs(_cell_number(data_book, "Sensitivity", "F11") - next(item for item in model.scenario_valuations if item.scenario == "base").value_per_share)
         if center_difference > Decimal("0.01"):
             raise ValueError("Sensitivity center does not reconcile to Base value per share.")
@@ -1891,7 +2380,9 @@ def inspect_workbook(
                 raise ValueError("Sensitivity is not decreasing with WACC.")
         model_status = data_book["Checks"]["H6"].value
         if model_status != "PASS WITH WARNINGS":
-            raise ValueError("Workbook aggregate check status is not PASS WITH WARNINGS.")
+            raise ValueError(
+                "Workbook canonical publication status is not PASS WITH WARNINGS."
+            )
         check_sheet = formula_book["Checks"]
         sentinel_rows = [
             row
@@ -1905,16 +2396,55 @@ def inspect_workbook(
             raise ValueError(
                 "Desktop Excel recalculation sentinel did not replace its invalid seed."
             )
-        statuses = [data_book["Checks"][f"H{row}"].value for row in range(9, data_book["Checks"].max_row + 1)]
-        if statuses.count("FAIL"):
-            raise ValueError("Workbook contains a failing blocking check.")
+        control_rows = [
+            (
+                data_book["Checks"][f"B{row}"].value,
+                data_book["Checks"][f"H{row}"].value,
+            )
+            for row in range(9, data_book["Checks"].max_row + 1)
+        ]
+        statuses = [status for _, status in control_rows]
+        expected_summaries = {
+            "A6": "PASS",
+            "C6": "MATCHES APPROVED",
+            "E6": "WARNINGS PRESENT",
+            "G6": "PASS",
+        }
+        if any(
+            data_book["Checks"][cell].value != expected
+            for cell, expected in expected_summaries.items()
+        ):
+            raise ValueError("Workbook control-class summaries are not canonical.")
+        allowed_statuses = {
+            "Mechanical integrity": {"PASS"},
+            "Approved snapshot": {"MATCHES APPROVED"},
+            "Package/build control": {"PASS"},
+            "Conditional / input warning": {"PASS"},
+            "Valuation warning": {"PASS", "WARNING", "STRONG WARNING"},
+        }
+        if any(
+            control_class not in allowed_statuses
+            or status not in allowed_statuses[control_class]
+            for control_class, status in control_rows
+        ):
+            raise ValueError(
+                "Workbook contains a noncanonical, failed, unverified, or inapplicable control."
+            )
         return {
             "sheets": tuple(formula_book.sheetnames),
             "formula_count": len(formulas),
             "check_status": model_status,
             "pass_count": statuses.count("PASS"),
-            "warning_count": statuses.count("WARNING") + statuses.count("STRONG WARNING"),
+            "snapshot_match_count": statuses.count("MATCHES APPROVED"),
+            "warning_count": sum(
+                status in {"WARNING", "STRONG WARNING", "INPUT WARNING"}
+                for status in statuses
+            ),
             "fail_count": statuses.count("FAIL"),
+            "mechanical_status": data_book["Checks"]["A6"].value,
+            "snapshot_status": data_book["Checks"]["C6"].value,
+            "warning_status": data_book["Checks"]["E6"].value,
+            "package_build_control_status": data_book["Checks"]["G6"].value,
             "xnpv_difference": format(xnpv_difference, "f"),
             "scenario_differences": reconciliations,
             "package": package,
